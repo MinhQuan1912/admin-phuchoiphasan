@@ -6,18 +6,18 @@
             class="w-full h-12 border border-gray-200 rounded-[10px] px-3.5 text-base font-semibold outline-none focus:border-primary transition-colors mb-[18px]" />
 
          <label class="block text-[13px] font-semibold mb-1.5">
-            Đường dẫn (slug)
+            Đường dẫn
          </label>
          <div class="flex items-center gap-2 mb-1.5">
             <span class="text-[13px] text-gray-400 shrink-0 font-mono">/tin-tuc/</span>
             <input v-model="slug" placeholder="tu-sinh-tu-tieu-de" @input="slugTouched = true"
                class="flex-1 h-[42px] border border-gray-200 rounded-[10px] px-3.5 text-sm font-mono outline-none focus:border-primary transition-colors" />
-            <button v-if="slugTouched || isEdit" type="button" title="Sinh lại từ tiêu đề" @click="regenerateSlug"
+            <button v-if="slugTouched || isEdit" type="button" title="Hoàn tác" @click="regenerateSlug"
                class="h-[42px] px-3 shrink-0 border border-gray-200 rounded-[10px] text-gray-500 hover:border-primary hover:text-primary transition-colors">
                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
             </button>
          </div>
-         <label class="block text-[13px] font-semibold mb-1.5">Mô tả ngắn (sapo)</label>
+         <label class="block text-[13px] font-semibold mb-1.5">Mô tả ngắn</label>
          <textarea v-model="description" placeholder="Tóm tắt nội dung hiển thị ở danh sách..."
             class="w-full h-[76px] border border-gray-200 rounded-[10px] p-3 text-sm leading-relaxed outline-none focus:border-primary transition-colors resize-y mb-[18px]"></textarea>
 
@@ -195,8 +195,6 @@ function onPickThumbnail(e: Event) {
 function onPreview() {
    openPreview({
       title: title.value,
-      description: description.value,
-      thumbnail: displayThumbnail.value,
       categoryName: selectedCategory.value?.name,
       blocks: blocks.value,
    })

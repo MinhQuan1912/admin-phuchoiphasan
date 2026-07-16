@@ -21,13 +21,18 @@
             @click="onChangeStatus(s.value)">
             {{ s.label }}
          </button>
-         <span v-if="store.filters.categoryId"
-            class="h-[34px] pl-3.5 pr-2 inline-flex items-center gap-1.5 rounded-full text-[13px] font-semibold bg-primary/10 text-primary border border-primary/20">
-            Chuyên mục: {{ activeCategory?.name ?? '...' }}
-            <button type="button" title="Bỏ lọc chuyên mục" class="flex hover:opacity-70" @click="clearCategory">
-               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            </button>
-         </span>
+         <div class="relative ml-auto">
+            <select v-model="selectedCategoryId" @change="onChangeCategory"
+               class="h-[34px] border rounded-full pl-3.5 pr-9 text-[13px] font-semibold appearance-none outline-none cursor-pointer bg-white transition-colors"
+               :class="selectedCategoryId ? 'text-primary border-primary/40' : 'text-gray-600 border-gray-200 hover:border-primary'">
+               <option :value="undefined">Tất cả chuyên mục</option>
+               <option v-for="c in categoryStore.items" :key="c.id" :value="c.id">{{ c.name }}</option>
+            </select>
+            <span class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none flex"
+               :class="selectedCategoryId ? 'text-primary' : 'text-gray-500'">
+               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </span>
+         </div>
       </div>
 
       <div class="bg-white border border-gray-200 rounded-[14px] overflow-hidden">
@@ -145,22 +150,25 @@ function load(page = 1) {
 }
 
 const route = useRoute()
-const categoryId = route.query.categoryId as string | undefined
-store.filters.categoryId = categoryId || undefined
-
-const activeCategory = computed(() =>
-   categoryId ? categoryStore.items.find(c => c.id === categoryId) : undefined,
+// Cho phép mở trang với ?categoryId=... (bấm từ trang chuyên mục sang)
+const selectedCategoryId = ref<string | undefined>(
+   (route.query.categoryId as string) || undefined,
 )
+store.filters.categoryId = selectedCategoryId.value
 
 onMounted(async () => {
-   if (categoryId) categoryStore.fetchAll().catch(() => null)
+   categoryStore.fetchAll().catch(() => null)
    await load(1)
    firstLoad.value = false
 })
 
-function clearCategory() {
-   store.filters.categoryId = undefined
-   navigateTo('/bai-viet')
+function onChangeCategory() {
+   store.filters.categoryId = selectedCategoryId.value
+   // Đồng bộ URL để chia sẻ/refresh giữ nguyên bộ lọc
+   navigateTo({
+      path: '/bai-viet',
+      query: selectedCategoryId.value ? { categoryId: selectedCategoryId.value } : {},
+   })
    load(1)
 }
 

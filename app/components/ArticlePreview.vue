@@ -1,6 +1,6 @@
 <template>
    <div class="frontend-surface min-h-screen bg-gray-50 text-gray-900">
-      <article class="container mx-auto px-6 pt-11 pb-14">
+      <article class="container max-w-3xl mx-auto px-6 pt-11 pb-14">
          <nav class="text-sm text-gray-500 mb-5">
             <span>Trang chủ</span>
             <span class="opacity-60 mx-1">/</span>
@@ -21,26 +21,22 @@
             <span>{{ readingTime }} phút đọc</span>
          </div>
 
-         <div v-if="thumbnail" class="aspect-video my-7 rounded-2xl overflow-hidden">
-            <img :src="thumbnail" alt="" class="w-full h-full object-contain">
-         </div>
-         <div v-else
-            class="aspect-video my-7 rounded-2xl border-[1.5px] border-dashed border-gray-300 flex items-center justify-center text-[13px] text-gray-400">
-            Chưa có ảnh đại diện
-         </div>
-
-         <p v-if="description" class="mb-5 text-[19px] leading-relaxed font-medium">{{ description }}</p>
-
          <div v-if="!renderable.length" class="py-10 text-center text-sm text-gray-500">
             Chưa có nội dung để xem thử.
          </div>
 
-         <template v-for="b in renderable" :key="b.key">
-            <div v-if="b.type === 'TEXT'" class="article-body" v-html="b.content"></div>
-            <figure v-else class="my-7">
-               <img :src="b.content" alt="" class="w-full rounded-2xl">
-            </figure>
-         </template>
+         <div v-else class="mt-7">
+            <template v-for="b in renderable" :key="b.key">
+               <div v-if="b.type === 'TEXT'" class="article-body" v-html="b.content"></div>
+               <figure v-else class="my-7">
+                  <img :src="b.content" :alt="b.caption || ''" class="w-full h-125 object-cover rounded-2xl">
+                  <figcaption v-if="b.caption"
+                     class="mt-2.5 text-center text-[13px] leading-relaxed text-gray-500 italic">
+                     {{ b.caption }}
+                  </figcaption>
+               </figure>
+            </template>
+         </div>
       </article>
    </div>
 </template>
@@ -50,8 +46,6 @@ import type { ArticlePreviewDraft } from '~/types'
 
 const props = defineProps<{
    title: string
-   description: string
-   thumbnail?: string
    categoryName?: string
    blocks: ArticlePreviewDraft['blocks']
 }>()
@@ -158,6 +152,23 @@ const readingTime = computed(() => {
 .article-body :deep(a) {
    color: var(--color-primary);
    text-decoration: underline;
+}
+
+.article-body :deep(mark) {
+   padding: 0.05em 0.2em;
+   border-radius: 0.25em;
+   color: inherit;
+}
+
+.article-body :deep(sub),
+.article-body :deep(sup) {
+   line-height: 0;
+   font-size: 0.75em;
+}
+
+.article-body :deep([style*="text-align"]) {
+   /* TextAlign ghi style inline; đảm bảo áp cho cả heading lẫn đoạn văn */
+   display: block;
 }
 
 .article-body :deep(> :last-child) {

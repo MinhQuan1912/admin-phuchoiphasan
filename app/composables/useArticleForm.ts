@@ -32,11 +32,12 @@ export function useArticleForm() {
         if (b.type === "TEXT") {
           return { type: "TEXT", content: b.content || "" };
         }
+        const caption = b.caption?.trim() || undefined;
         if (!b.file && b.content?.startsWith("http")) {
-          return { type: "IMAGE", imageIndex: -1, content: b.content };
+          return { type: "IMAGE", imageIndex: -1, content: b.content, caption };
         }
         fd.append("contentImages", b.file as File);
-        return { type: "IMAGE", imageIndex: imageIndex++ };
+        return { type: "IMAGE", imageIndex: imageIndex++, caption };
       });
       fd.append("blocks", JSON.stringify(json));
     }
@@ -81,6 +82,7 @@ export function useArticleForm() {
         key: b.id,
         type: b.type,
         content: b.content,
+        caption: b.caption ?? "",
         file: null,
       }));
   }

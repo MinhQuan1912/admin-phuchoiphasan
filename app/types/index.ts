@@ -38,6 +38,8 @@ export interface ContentBlock {
   id: string;
   type: BlockType;
   content: string;
+  // Chú thích ảnh, luôn null với block TEXT
+  caption: string | null;
   order: number;
   articleId: string;
 }
@@ -75,6 +77,7 @@ export interface EditorBlock {
   key: string;
   type: BlockType;
   content: string;
+  caption?: string;
   file?: File | null;
   preview?: string;
 }
@@ -82,18 +85,19 @@ export interface EditorBlock {
 /**
  * Bản nháp gửi sang tab xem thử qua localStorage. Phải JSON hóa được nên không
  * mang theo File — ảnh chưa upload đi bằng blob URL của tab đang soạn.
+ *
+ * Không có thumbnail/description: hai trường đó chỉ dùng cho card ở danh sách
+ * và SEO, thân bài không render lại.
  */
 export interface ArticlePreviewDraft {
   title: string;
-  description: string;
-  thumbnail?: string;
   categoryName?: string;
-  blocks: { key: string; type: BlockType; content: string }[];
+  blocks: { key: string; type: BlockType; content: string; caption?: string }[];
 }
 
 export type BlockPayload =
   | { type: "TEXT"; content: string }
-  | { type: "IMAGE"; imageIndex: number; content?: string };
+  | { type: "IMAGE"; imageIndex: number; content?: string; caption?: string };
 
 export const STATUS_LABEL: Record<ArticleStatus, string> = {
   DRAFT: "Bản nháp",

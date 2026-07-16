@@ -11,6 +11,41 @@
          </button>
       </div>
 
+      <div v-if="palette" class="flex flex-wrap items-center gap-1.5 px-2 py-2 border-b border-gray-200 bg-white">
+         <template v-if="palette === 'color'">
+            <button v-for="c in TEXT_COLORS" :key="c" type="button" :title="c" @click="applyColor(c)"
+               class="w-6 h-6 rounded-md border border-gray-200 hover:scale-110 transition-transform"
+               :style="{ backgroundColor: c }"></button>
+            <label title="Chọn màu tùy ý"
+               class="w-6 h-6 shrink-0 rounded-md border border-gray-200 overflow-hidden cursor-pointer relative"
+               :style="{ backgroundColor: currentColor || '#000000' }">
+               <span class="absolute inset-0 flex items-center justify-center text-white mix-blend-difference text-[13px] font-bold leading-none">+</span>
+               <input type="color" :value="currentColor || '#000000'" @input="applyColor(($event.target as HTMLInputElement).value, false)"
+                  class="absolute inset-0 opacity-0 cursor-pointer">
+            </label>
+            <button type="button" title="Bỏ màu chữ" @click="clearColor"
+               class="h-6 px-2 rounded-md border border-gray-200 text-[11px] font-semibold text-gray-500 hover:text-primary hover:border-primary">
+               Bỏ màu
+            </button>
+         </template>
+         <template v-else>
+            <button v-for="c in HIGHLIGHT_COLORS" :key="c" type="button" :title="c" @click="applyHighlight(c)"
+               class="w-6 h-6 rounded-md border border-gray-200 hover:scale-110 transition-transform"
+               :style="{ backgroundColor: c }"></button>
+            <label title="Chọn màu tùy ý"
+               class="w-6 h-6 shrink-0 rounded-md border border-gray-200 overflow-hidden cursor-pointer relative"
+               :style="{ backgroundColor: currentHighlight || '#fef08a' }">
+               <span class="absolute inset-0 flex items-center justify-center text-gray-700 text-[13px] font-bold leading-none">+</span>
+               <input type="color" :value="currentHighlight || '#fef08a'" @input="applyHighlight(($event.target as HTMLInputElement).value, false)"
+                  class="absolute inset-0 opacity-0 cursor-pointer">
+            </label>
+            <button type="button" title="Bỏ bôi nền" @click="clearHighlight"
+               class="h-6 px-2 rounded-md border border-gray-200 text-[11px] font-semibold text-gray-500 hover:text-primary hover:border-primary">
+               Bỏ nền
+            </button>
+         </template>
+      </div>
+
       <EditorContent :editor="editor" @focusin="focused = true" @focusout="focused = false" />
    </div>
 
@@ -38,11 +73,21 @@
 import { useEditor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import { Placeholder } from '@tiptap/extensions'
+import TextAlign from '@tiptap/extension-text-align'
+import Highlight from '@tiptap/extension-highlight'
+import Subscript from '@tiptap/extension-subscript'
+import Superscript from '@tiptap/extension-superscript'
+import { TextStyle, Color } from '@tiptap/extension-text-style'
 
 const props = defineProps<{ placeholder?: string }>()
 const model = defineModel<string>({ required: true })
 
 const focused = ref(false)
+
+// Bảng màu preset: người soạn chọn từ danh sách cố định thay vì color picker tự
+// do, để bài viết giữ được bộ màu nhất quán với giao diện site.
+const TEXT_COLORS = ['#dc2626', '#ea580c', '#ca8a04', '#16a34a', '#2563eb', '#7c3aed']
+const HIGHLIGHT_COLORS = ['#fef08a', '#bbf7d0', '#bfdbfe', '#fbcfe8', '#fed7aa']
 
 const editor = useEditor({
    content: model.value,
@@ -51,6 +96,12 @@ const editor = useEditor({
          link: { openOnClick: false },
       }),
       Placeholder.configure({ placeholder: () => props.placeholder ?? '' }),
+      TextAlign.configure({ types: ['heading', 'paragraph'] }),
+      Highlight.configure({ multicolor: true }),
+      Subscript,
+      Superscript,
+      TextStyle,
+      Color,
    ],
    editorProps: {
       attributes: {
@@ -71,6 +122,13 @@ const icons = {
    undo: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-5a6 6 0 0 0-6-6H4"/></svg>',
    redo: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 14 20 9 15 4"/><path d="M4 20v-5a6 6 0 0 1 6-6h10"/></svg>',
    clear: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V4h16v3"/><path d="M5 20h6"/><path d="M13 4L8 20"/><line x1="15" y1="12" x2="21" y2="18"/><line x1="21" y1="12" x2="15" y2="18"/></svg>',
+   alignLeft: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="14" y2="12"/><line x1="3" y1="18" x2="18" y2="18"/></svg>',
+   alignCenter: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="6" y1="12" x2="18" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>',
+   alignRight: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="10" y1="12" x2="21" y2="12"/><line x1="6" y1="18" x2="21" y2="18"/></svg>',
+   highlight: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l-4 4v3h3l4-4"/><path d="M14 6l4 4"/><path d="M12 8l4-4a2 2 0 0 1 3 3l-4 4z"/></svg>',
+   color: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l4 8H8z"/><path d="M8 11h8l-1.5 5h-5z"/><line x1="7" y1="21" x2="17" y2="21"/></svg>',
+   sub: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6l8 10M12 6L4 16"/><path d="M20 20h-4c0-1.5 1-2 2-2.5s2-1 2-2.2A1.3 1.3 0 0 0 17 14"/></svg>',
+   sup: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8l8 10M12 8L4 18"/><path d="M20 10h-4c0-1.5 1-2 2-2.5s2-1 2-2.2A1.3 1.3 0 0 0 17 4"/></svg>',
 }
 
 interface Tool {
@@ -96,6 +154,13 @@ const tools = computed<Tool[]>(() => {
       { title: 'Danh sách đầu dòng', icon: icons.bulletList, run: () => e.chain().focus().toggleBulletList().run(), active: () => e.isActive('bulletList') },
       { title: 'Danh sách đánh số', icon: icons.orderedList, run: () => e.chain().focus().toggleOrderedList().run(), active: () => e.isActive('orderedList') },
       { title: 'Trích dẫn', icon: icons.quote, run: () => e.chain().focus().toggleBlockquote().run(), active: () => e.isActive('blockquote') },
+      { title: 'Căn trái', icon: icons.alignLeft, run: () => e.chain().focus().setTextAlign('left').run(), active: () => e.isActive({ textAlign: 'left' }) },
+      { title: 'Căn giữa', icon: icons.alignCenter, run: () => e.chain().focus().setTextAlign('center').run(), active: () => e.isActive({ textAlign: 'center' }) },
+      { title: 'Căn phải', icon: icons.alignRight, run: () => e.chain().focus().setTextAlign('right').run(), active: () => e.isActive({ textAlign: 'right' }) },
+      { title: 'Màu chữ', icon: icons.color, run: () => togglePalette('color'), active: () => e.isActive('textStyle') },
+      { title: 'Bôi nền', icon: icons.highlight, run: () => togglePalette('highlight'), active: () => e.isActive('highlight') },
+      { title: 'Chỉ số dưới', icon: icons.sub, run: () => e.chain().focus().toggleSubscript().run(), active: () => e.isActive('subscript') },
+      { title: 'Chỉ số trên', icon: icons.sup, run: () => e.chain().focus().toggleSuperscript().run(), active: () => e.isActive('superscript') },
       { title: 'Chèn link', icon: icons.link, run: openLinkForm, active: () => e.isActive('link') },
       { title: 'Bỏ link', icon: icons.unlink, run: () => e.chain().focus().unsetLink().run(), disabled: () => !e.isActive('link') },
       { title: 'Xóa định dạng', icon: icons.clear, run: () => e.chain().focus().unsetAllMarks().clearNodes().run() },
@@ -103,6 +168,38 @@ const tools = computed<Tool[]>(() => {
       { title: 'Làm lại', icon: icons.redo, run: () => e.chain().focus().redo().run(), disabled: () => !e.can().redo() },
    ]
 })
+
+const palette = ref<'color' | 'highlight' | null>(null)
+
+function togglePalette(which: 'color' | 'highlight') {
+   palette.value = palette.value === which ? null : which
+}
+
+// Màu đang áp cho vùng chọn, để ô "tùy ý" mở đúng màu hiện tại
+const currentColor = computed(() => editor.value?.getAttributes('textStyle').color as string | undefined)
+const currentHighlight = computed(() => editor.value?.getAttributes('highlight').color as string | undefined)
+
+// close=false khi kéo trong color picker: sự kiện input bắn liên tục, đóng panel
+// mỗi lần sẽ giật; preset bấm một phát thì đóng luôn cho gọn
+function applyColor(hex: string, close = true) {
+   editor.value?.chain().focus().setColor(hex).run()
+   if (close) palette.value = null
+}
+
+function clearColor() {
+   editor.value?.chain().focus().unsetColor().run()
+   palette.value = null
+}
+
+function applyHighlight(hex: string, close = true) {
+   editor.value?.chain().focus().setHighlight({ color: hex }).run()
+   if (close) palette.value = null
+}
+
+function clearHighlight() {
+   editor.value?.chain().focus().unsetHighlight().run()
+   palette.value = null
+}
 
 const linkForm = ref<{ href: string; editing: boolean } | null>(null)
 const linkInput = useTemplateRef<HTMLInputElement>('linkInput')
@@ -192,6 +289,18 @@ watch(model, (v) => {
    a {
       color: var(--color-primary);
       text-decoration: underline;
+   }
+
+   mark {
+      padding: 0.05em 0.18em;
+      border-radius: 0.25em;
+      color: inherit;
+   }
+
+   sub,
+   sup {
+      line-height: 0;
+      font-size: 0.75em;
    }
 
    :first-child {

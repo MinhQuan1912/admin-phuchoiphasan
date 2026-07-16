@@ -1,7 +1,7 @@
 import type { FetchOptions } from "ofetch";
 
 
-const GUEST_PATHS = ["/dang-nhap", "/forgot-password", "/reset-password"];
+const GUEST_PATHS = ["/dang-nhap"];
 
 export function useApi() {
   const config = useRuntimeConfig();

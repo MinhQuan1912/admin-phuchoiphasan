@@ -41,6 +41,9 @@
             <p v-if="b.content && !b.file" class="text-xs text-gray-500">
                Ảnh hiện tại (giữ nguyên nếu không chọn ảnh mới)
             </p>
+
+            <input v-model="b.caption" type="text" placeholder="Tiêu đề ảnh (không bắt buộc)"
+               class="w-full h-[38px] border border-gray-200 rounded-[10px] px-3 text-sm outline-none focus:border-primary transition-colors">
          </div>
       </div>
 
@@ -73,7 +76,7 @@ function addText() {
 }
 
 function addImage() {
-   blocks.value.push({ key: uid(), type: 'IMAGE', content: '', file: null })
+   blocks.value.push({ key: uid(), type: 'IMAGE', content: '', caption: '', file: null })
 }
 
 function remove(i: number) {

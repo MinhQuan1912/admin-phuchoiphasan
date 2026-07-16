@@ -13,8 +13,7 @@
          <p class="mt-1.5 text-[13px] text-gray-400">Hãy bấm "Xem thử" lại từ trang soạn bài viết.</p>
       </div>
 
-      <ArticlePreview v-else :title="draft.title" :description="draft.description" :thumbnail="draft.thumbnail"
-         :category-name="draft.categoryName" :blocks="draft.blocks" />
+      <ArticlePreview v-else :title="draft.title" :category-name="draft.categoryName" :blocks="draft.blocks" />
    </div>
 </template>
 

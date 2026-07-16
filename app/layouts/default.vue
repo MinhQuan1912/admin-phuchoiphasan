@@ -1,34 +1,38 @@
 <template>
    <div class="min-h-screen bg-gray-50 text-gray-900 font-sans grid transition-[grid-template-columns] duration-200"
       :style="{ gridTemplateColumns: sidebarOpen ? '248px 1fr' : '72px 1fr' }">
-      <!-- Sidebar -->
       <aside class="bg-[#0f1e35] text-white flex flex-col sticky top-0 h-screen">
-         <div class="h-16 flex items-center gap-2.5 px-4.5 border-b border-white/8">
+         <button type="button" @click="sidebarOpen = !sidebarOpen"
+            :title="sidebarOpen ? 'Thu gọn thanh bên' : 'Mở rộng thanh bên'"
+            class="h-16 w-full flex items-center gap-2.5 px-4.5 border-b border-white/8 hover:bg-white/5 transition-colors">
             <div
                class="w-9 h-9 shrink-0 rounded-[9px] bg-primary text-white flex items-center justify-center font-extrabold text-[13px]">
                QTV</div>
             <span v-if="sidebarOpen" class="font-extrabold text-[15px] whitespace-nowrap">Admin QTV</span>
-         </div>
+         </button>
          <nav class="flex-1 p-3 flex flex-col gap-1">
-            <NuxtLink v-for="item in menu" :key="item.to" :to="item.to"
-               class="flex items-center gap-3 h-[42px] px-3 rounded-[9px] text-sm font-semibold transition-colors"
-               :class="isActive(item)
-                  ? 'bg-primary text-white'
-                  : 'text-white/70 hover:bg-white/8 hover:text-white'">
+            <NuxtLink v-for="item in menu" :key="item.to" :to="item.to" :title="sidebarOpen ? undefined : item.label"
+               class="flex items-center gap-3 h-[42px] rounded-[9px] text-sm font-semibold transition-colors"
+               :class="[
+                  sidebarOpen ? 'px-3' : 'justify-center',
+                  isActive(item)
+                     ? 'bg-primary text-white'
+                     : 'text-white/70 hover:bg-white/8 hover:text-white',
+               ]">
                <span class="shrink-0 flex" v-html="item.icon"></span>
                <span v-if="sidebarOpen" class="whitespace-nowrap">{{ item.label }}</span>
             </NuxtLink>
          </nav>
          <div class="p-3 border-t border-white/8">
-            <button type="button" @click="onLogout"
-               class="w-full flex items-center gap-3 h-[42px] px-3 rounded-[9px] text-white/70 text-sm font-semibold hover:bg-white/8 hover:text-white transition-colors">
+            <button type="button" @click="onLogout" :title="sidebarOpen ? undefined : 'Đăng xuất'"
+               class="w-full flex items-center gap-3 h-[42px] rounded-[9px] text-white/70 text-sm font-semibold hover:bg-white/8 hover:text-white transition-colors"
+               :class="sidebarOpen ? 'px-3' : 'justify-center'">
                <span class="shrink-0 flex" v-html="icons.logout"></span>
                <span v-if="sidebarOpen" class="whitespace-nowrap">Đăng xuất</span>
             </button>
          </div>
       </aside>
 
-      <!-- Main -->
       <div class="flex flex-col min-w-0">
          <header
             class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 sticky top-0 z-40">
