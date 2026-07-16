@@ -44,12 +44,10 @@ const model = defineModel<string>({ required: true })
 
 const focused = ref(false)
 
-// useEditor tự dựng editor ở client (Nuxt render sẵn ở server) và tự destroy khi unmount
 const editor = useEditor({
    content: model.value,
    extensions: [
       StarterKit.configure({
-         // Bấm link trong lúc soạn thì đặt con trỏ, không mở tab mới
          link: { openOnClick: false },
       }),
       Placeholder.configure({ placeholder: () => props.placeholder ?? '' }),
@@ -60,7 +58,6 @@ const editor = useEditor({
       },
    },
    onUpdate: ({ editor }) => {
-      // Tiptap để lại '<p></p>' khi xóa hết chữ — quy về rỗng để validate bắt được
       model.value = editor.isEmpty ? '' : editor.getHTML()
    },
 })
@@ -124,25 +121,19 @@ function submitLink() {
    linkForm.value = null
    if (!e) return
 
-   // Để trống → bỏ liên kết
    if (!href) {
       e.chain().focus().unsetLink().run()
       return
    }
-   // extendMarkRange để sửa được cả link cũ khi chỉ đặt con trỏ giữa nó,
-   // không cần bôi đen lại toàn bộ
+
    e.chain().focus().extendMarkRange('link').setLink({ href: withScheme(href) }).run()
 }
 
-// "vi.wikipedia.org" mà không có scheme sẽ bị hiểu là đường dẫn tương đối của
-// chính trang tin, nên tự thêm https:// cho các dạng địa chỉ thông thường.
 function withScheme(href: string) {
    if (/^(https?:|mailto:|tel:|\/|#)/i.test(href)) return href
    return `https://${href}`
 }
 
-// Nội dung được nạp từ ngoài (mở bài viết cũ) thì đẩy vào editor.
-// So sánh với getHTML() để không nạp đè lên chính cái editor vừa gõ ra.
 watch(model, (v) => {
    const e = editor.value
    if (!e) return
@@ -153,8 +144,7 @@ watch(model, (v) => {
 </script>
 
 <style scoped>
-/* Tailwind preflight xóa hết style mặc định của h2/ul/blockquote nên phải
-   dựng lại trong vùng soạn thảo, cho khớp với lúc hiển thị ngoài trang tin. */
+
 :deep(.tiptap-content) {
    h2 {
       font-size: 1.25rem;

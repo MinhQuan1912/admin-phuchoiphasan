@@ -33,7 +33,7 @@
             <h3 class="text-[15px] font-extrabold mb-3">Ảnh đại diện</h3>
             <label class="block cursor-pointer">
                <img v-if="displayThumbnail" :src="displayThumbnail"
-                  class="w-full aspect-video rounded-[10px] border border-gray-200 object-cover">
+                  class="w-full aspect-video rounded-[10px] border border-gray-200 object-contain">
                <div v-else
                   class="aspect-video border-[1.5px] border-dashed border-gray-300 rounded-[10px] flex flex-col items-center justify-center gap-2 text-gray-400 hover:border-primary hover:text-primary transition-colors">
                   <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
