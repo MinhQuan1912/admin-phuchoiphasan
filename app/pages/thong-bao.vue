@@ -23,9 +23,9 @@
          </button>
       </div>
 
-      <div class="bg-white border border-gray-200 rounded-[14px] overflow-hidden">
+      <div class="bg-white border border-gray-200 rounded-[14px] overflow-x-auto">
          <div
-            class="grid grid-cols-[190px_1fr_140px_160px_90px] gap-4 items-center px-5 py-3.5 bg-gray-100 uppercase tracking-wide text-[11px] font-bold text-gray-500">
+            class="grid min-w-[760px] grid-cols-[190px_1fr_140px_160px_90px] gap-4 items-center px-5 py-3.5 bg-gray-100 uppercase tracking-wide text-[11px] font-bold text-gray-500">
             <div>Tòa án</div>
             <div>Doanh nghiệp</div>
             <div>Loại</div>
@@ -33,7 +33,7 @@
             <div class="text-right">Thao tác</div>
          </div>
          <div v-for="a in filtered" :key="a.no"
-            class="grid grid-cols-[190px_1fr_140px_160px_90px] gap-4 items-center px-5 py-3.5 border-t border-gray-100 hover:bg-gray-50/60 transition-colors">
+            class="grid min-w-[760px] grid-cols-[190px_1fr_140px_160px_90px] gap-4 items-center px-5 py-3.5 border-t border-gray-100 hover:bg-gray-50/60 transition-colors">
             <div class="text-[13px] font-semibold text-primary">{{ a.court }}</div>
             <div class="min-w-0">
                <div class="text-sm font-semibold truncate">{{ a.title }}</div>

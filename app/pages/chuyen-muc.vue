@@ -1,9 +1,7 @@
 <template>
    <div>
-      <div class="flex flex-wrap gap-3 items-center justify-between mb-[18px]">
-         <p class="text-[13px] text-gray-500">
-            Chuyên mục dùng để phân loại bài viết.
-         </p>
+      <div class="flex flex-wrap gap-3 items-center justify-end
+       mb-[18px]">
          <button type="button" @click="openCreate"
             class="h-[42px] inline-flex items-center gap-2 px-[18px] bg-primary text-white rounded-[10px] font-semibold text-sm">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -11,8 +9,8 @@
          </button>
       </div>
 
-      <div class="bg-white border border-gray-200 rounded-[14px] overflow-hidden">
-         <div class="grid grid-cols-[1fr_220px_110px_90px] gap-4 items-center px-5 py-3.5 bg-gray-100 uppercase tracking-wide text-[11px] font-bold text-gray-500">
+      <div class="bg-white border border-gray-200 rounded-[14px] overflow-x-auto">
+         <div class="grid min-w-[680px] grid-cols-[1fr_220px_110px_90px] gap-4 items-center px-5 py-3.5 bg-gray-100 uppercase tracking-wide text-[11px] font-bold text-gray-500">
             <div>Tên</div><div>Slug</div><div>Số bài</div><div class="text-right">Thao tác</div>
          </div>
 
@@ -27,7 +25,7 @@
          <div v-else :aria-busy="store.loading" class="transition-opacity duration-150"
             :class="store.loading ? 'opacity-60' : 'opacity-100'">
             <div v-for="c in store.items" :key="c.id"
-               class="grid grid-cols-[1fr_220px_110px_90px] gap-4 items-center px-5 py-3.5 border-t border-gray-100 hover:bg-gray-50/60 transition-colors">
+               class="grid min-w-[680px] grid-cols-[1fr_220px_110px_90px] gap-4 items-center px-5 py-3.5 border-t border-gray-100 hover:bg-gray-50/60 transition-colors">
                <div class="text-sm font-semibold truncate">{{ c.name }}</div>
                <div class="text-[13px] text-gray-500 font-mono truncate">{{ c.slug }}</div>
                <div>

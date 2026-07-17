@@ -29,7 +29,7 @@
             <template v-for="b in renderable" :key="b.key">
                <div v-if="b.type === 'TEXT'" class="article-body" v-html="b.content"></div>
                <figure v-else class="my-7">
-                  <img :src="b.content" :alt="b.caption || ''" class="w-full h-125 object-cover rounded-2xl">
+                  <img :src="b.content" :alt="b.caption || ''" class="w-full h-56 sm:h-80 lg:h-125 object-cover rounded-2xl">
                   <figcaption v-if="b.caption"
                      class="mt-2.5 text-center text-[13px] leading-relaxed text-gray-500 italic">
                      {{ b.caption }}
@@ -167,7 +167,6 @@ const readingTime = computed(() => {
 }
 
 .article-body :deep([style*="text-align"]) {
-   /* TextAlign ghi style inline; đảm bảo áp cho cả heading lẫn đoạn văn */
    display: block;
 }
 

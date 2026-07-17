@@ -35,8 +35,8 @@
          </div>
       </div>
 
-      <div class="bg-white border border-gray-200 rounded-[14px] overflow-hidden">
-         <div class="grid grid-cols-[1fr_150px_130px_120px_90px] gap-4 items-center px-5 py-3.5 bg-gray-100 uppercase tracking-wide text-[11px] font-bold text-gray-500">
+      <div class="bg-white border border-gray-200 rounded-[14px] overflow-x-auto">
+         <div class="grid min-w-[820px] grid-cols-[1fr_150px_130px_120px_90px] gap-4 items-center px-5 py-3.5 bg-gray-100 uppercase tracking-wide text-[11px] font-bold text-gray-500">
             <div>Tiêu đề</div><div>Chuyên mục</div><div>Ngày</div><div>Trạng thái</div><div class="text-right">Thao tác</div>
          </div>
 
@@ -52,7 +52,7 @@
          <div v-else :aria-busy="store.loading" class="transition-opacity duration-150"
             :class="store.loading ? 'opacity-60' : 'opacity-100'">
             <div v-for="p in store.items" :key="p.id"
-               class="grid grid-cols-[1fr_150px_130px_120px_90px] gap-4 items-center px-5 py-3.5 border-t border-gray-100 hover:bg-gray-50/60 transition-colors">
+               class="grid min-w-[820px] grid-cols-[1fr_150px_130px_120px_90px] gap-4 items-center px-5 py-3.5 border-t border-gray-100 hover:bg-gray-50/60 transition-colors">
                <div class="flex items-center gap-3 min-w-0">
                   <img :src="p.thumbnail" :alt="p.title" class="w-12 h-[34px] shrink-0 rounded-md object-cover bg-gray-100">
                   <div class="min-w-0">
@@ -150,7 +150,6 @@ function load(page = 1) {
 }
 
 const route = useRoute()
-// Cho phép mở trang với ?categoryId=... (bấm từ trang chuyên mục sang)
 const selectedCategoryId = ref<string | undefined>(
    (route.query.categoryId as string) || undefined,
 )
@@ -164,7 +163,6 @@ onMounted(async () => {
 
 function onChangeCategory() {
    store.filters.categoryId = selectedCategoryId.value
-   // Đồng bộ URL để chia sẻ/refresh giữ nguyên bộ lọc
    navigateTo({
       path: '/bai-viet',
       query: selectedCategoryId.value ? { categoryId: selectedCategoryId.value } : {},
