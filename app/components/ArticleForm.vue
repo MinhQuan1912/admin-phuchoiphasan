@@ -14,7 +14,7 @@
                class="flex-1 h-[42px] border border-gray-200 rounded-[10px] px-3.5 text-sm font-mono outline-none focus:border-primary transition-colors" />
             <button v-if="slugTouched || isEdit" type="button" title="Hoàn tác" @click="regenerateSlug"
                class="h-[42px] px-3 shrink-0 border border-gray-200 rounded-[10px] text-gray-500 hover:border-primary hover:text-primary transition-colors">
-               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+               <IconsRefresh class="size-[15px]" />
             </button>
          </div>
          <label class="block text-[13px] font-semibold mb-1.5">Mô tả ngắn</label>
@@ -36,7 +36,7 @@
                   class="w-full aspect-video rounded-[10px] border border-gray-200 object-contain">
                <div v-else
                   class="aspect-video border-[1.5px] border-dashed border-gray-300 rounded-[10px] flex flex-col items-center justify-center gap-2 text-gray-400 hover:border-primary hover:text-primary transition-colors">
-                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                  <IconsImage class="size-[26px]" stroke-width="1.8" />
                   <span class="text-[13px] font-semibold">Tải ảnh lên</span>
                   <span class="text-[11px]">PNG, JPG</span>
                </div>
@@ -57,7 +57,7 @@
                   <option v-for="c in categories" :key="c.id" :value="c.id">{{ c.name }}</option>
                </select>
                <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none flex">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                  <IconsChevronDown class="size-3" />
                </span>
             </div>
          </div>
@@ -69,7 +69,7 @@
                <button v-for="s in statusOptions" :key="s.value" type="button" @click="status = s.value"
                   class="h-[34px] inline-flex items-center justify-center gap-1.5 rounded-[7px] text-[13px] font-semibold transition-colors"
                   :class="status === s.value ? 'bg-white text-primary shadow-sm' : 'text-gray-500 hover:text-gray-900'">
-                  <span class="flex" v-html="s.icon"></span>
+                  <component :is="s.icon" class="size-[14px]" />
                   {{ s.label }}
                </button>
             </div>
@@ -79,7 +79,7 @@
 
             <button type="button" title="Mở bản xem thử ở tab mới" @click="onPreview"
                class="w-full h-11 mb-2.5 inline-flex items-center justify-center gap-2 bg-white border border-gray-200 rounded-[10px] font-semibold text-sm hover:border-primary hover:text-primary transition-colors">
-               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 12S5 5 12 5s10.5 7 10.5 7-3.5 7-10.5 7S1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3"/></svg>
+               <IconsEye class="size-4" />
                Xem thử
             </button>
             <div class="flex gap-2.5">
@@ -96,6 +96,8 @@
 </template>
 
 <script setup lang="ts">
+import type { Component } from 'vue'
+import { IconsCheck, IconsEdit } from '#components'
 import { useArticleForm } from '~/composables/useArticleForm'
 import { useArticlePreview } from '~/composables/useArticlePreview'
 import { useToastMessage } from '~/composables/useToastMessage'
@@ -145,9 +147,9 @@ const slugTouched = ref(!!props.initialSlug)
 const categories = computed(() => categoryStore.items)
 const selectedCategory = computed(() => categories.value.find(c => c.id === categoryId.value))
 
-const statusOptions: { value: ArticleStatus; label: string; icon: string }[] = [
-   { value: 'DRAFT', label: 'Bản nháp', icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.1 2.1 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>' },
-   { value: 'PUBLISHED', label: 'Đăng', icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>' },
+const statusOptions: { value: ArticleStatus; label: string; icon: Component }[] = [
+   { value: 'DRAFT', label: 'Bản nháp', icon: IconsEdit },
+   { value: 'PUBLISHED', label: 'Đăng', icon: IconsCheck },
 ]
 
 watch(() => props.initialTitle, v => v !== undefined && (title.value = v))

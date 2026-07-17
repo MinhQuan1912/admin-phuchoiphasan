@@ -3,14 +3,14 @@
       <div class="flex flex-wrap gap-3 items-center justify-between mb-[18px]">
          <div class="relative flex-1 min-w-[260px] max-w-[400px]">
             <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 flex">
-               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>
+               <IconsSearch class="size-[17px]" />
             </span>
             <input v-model="query" type="text" placeholder="Tìm bài viết..."
                class="w-full h-[42px] border border-gray-200 rounded-[10px] pl-10 pr-3.5 text-sm outline-none focus:border-primary transition-colors bg-white" />
          </div>
          <NuxtLink to="/bai-viet/create"
             class="h-[42px] inline-flex items-center gap-2 px-[18px] bg-primary text-white rounded-[10px] font-semibold text-sm">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <IconsPlus class="size-4" />
             Bài viết mới
          </NuxtLink>
       </div>
@@ -30,7 +30,7 @@
             </select>
             <span class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none flex"
                :class="selectedCategoryId ? 'text-primary' : 'text-gray-500'">
-               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+               <IconsChevronDown class="size-3" />
             </span>
          </div>
       </div>
@@ -71,10 +71,10 @@
                </div>
                <div class="flex gap-2 justify-end">
                   <NuxtLink :to="`/bai-viet/${p.id}`" title="Sửa" class="text-gray-500 hover:text-primary flex">
-                     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.1 2.1 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>
+                     <IconsEdit class="size-[17px]" />
                   </NuxtLink>
                   <button type="button" title="Xóa" :disabled="busyId === p.id" class="text-gray-500 hover:text-rose-800 disabled:opacity-40 flex" @click="askDelete(p)">
-                     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                     <IconsTrash class="size-[17px]" />
                   </button>
                </div>
             </div>

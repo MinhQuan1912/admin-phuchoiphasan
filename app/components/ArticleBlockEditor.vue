@@ -17,15 +17,15 @@
             <div class="flex items-center gap-1">
                <button type="button" title="Lên" :disabled="i === 0" @click="move(i, -1)"
                   class="w-7 h-7 flex items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 hover:text-primary disabled:opacity-30 disabled:hover:bg-transparent">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+                  <IconsChevronUp class="size-[15px]" />
                </button>
                <button type="button" title="Xuống" :disabled="i === blocks.length - 1" @click="move(i, 1)"
                   class="w-7 h-7 flex items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 hover:text-primary disabled:opacity-30 disabled:hover:bg-transparent">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                  <IconsChevronDown class="size-[15px]" />
                </button>
                <button type="button" title="Xóa khối" @click="remove(i)"
                   class="w-7 h-7 flex items-center justify-center rounded-md text-gray-500 hover:bg-rose-50 hover:text-rose-800">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                  <IconsTrash class="size-[15px]" />
                </button>
             </div>
          </div>
@@ -50,12 +50,12 @@
       <div class="flex gap-2">
          <button type="button" @click="addText"
             class="h-[38px] inline-flex items-center gap-2 px-3.5 bg-white border border-gray-200 rounded-[10px] font-semibold text-[13px] hover:border-primary hover:text-primary transition-colors">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+            <IconsText class="size-[15px]" />
             Thêm văn bản
          </button>
          <button type="button" @click="addImage"
             class="h-[38px] inline-flex items-center gap-2 px-3.5 bg-white border border-gray-200 rounded-[10px] font-semibold text-[13px] hover:border-primary hover:text-primary transition-colors">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            <IconsImage class="size-[15px]" />
             Thêm ảnh
          </button>
       </div>

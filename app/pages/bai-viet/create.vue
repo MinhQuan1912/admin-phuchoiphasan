@@ -2,10 +2,7 @@
    <div>
       <NuxtLink to="/bai-viet"
          class="inline-flex items-center gap-1.5 text-[13px] font-semibold text-gray-500 hover:text-primary transition-colors mb-4">
-         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="15 18 9 12 15 6" />
-         </svg>
+         <IconsChevronLeft class="size-[15px]" />
          Quay lại danh sách
       </NuxtLink>
 

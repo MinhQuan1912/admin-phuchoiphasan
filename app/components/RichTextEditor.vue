@@ -7,7 +7,7 @@
             :class="t.active?.() ? 'bg-primary/10 text-primary' : ''"
             @click="t.run">
             <span v-if="t.label" class="text-[13px] leading-none" :class="t.labelClass">{{ t.label }}</span>
-            <span v-else class="flex" v-html="t.icon"></span>
+            <component :is="t.icon" v-else class="size-[15px]" />
          </button>
       </div>
 
@@ -78,6 +78,12 @@ import Highlight from '@tiptap/extension-highlight'
 import Subscript from '@tiptap/extension-subscript'
 import Superscript from '@tiptap/extension-superscript'
 import { TextStyle, Color } from '@tiptap/extension-text-style'
+import type { Component } from 'vue'
+import {
+   IconsAlignCenter, IconsAlignLeft, IconsAlignRight, IconsBulletList, IconsColor,
+   IconsFormatClear, IconsHighlight, IconsLink, IconsOrderedList, IconsQuote,
+   IconsRedo, IconsSubscript, IconsSuperscript, IconsUndo, IconsUnlink,
+} from '#components'
 
 const props = defineProps<{ placeholder?: string }>()
 const model = defineModel<string>({ required: true })
@@ -113,29 +119,11 @@ const editor = useEditor({
    },
 })
 
-const icons = {
-   bulletList: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="9" y1="6" x2="20" y2="6"/><line x1="9" y1="12" x2="20" y2="12"/><line x1="9" y1="18" x2="20" y2="18"/><circle cx="4.5" cy="6" r="1.3" fill="currentColor" stroke="none"/><circle cx="4.5" cy="12" r="1.3" fill="currentColor" stroke="none"/><circle cx="4.5" cy="18" r="1.3" fill="currentColor" stroke="none"/></svg>',
-   orderedList: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="10" y1="6" x2="20" y2="6"/><line x1="10" y1="12" x2="20" y2="12"/><line x1="10" y1="18" x2="20" y2="18"/><text x="1.5" y="8.5" font-size="7.5" font-weight="700" fill="currentColor" stroke="none">1</text><text x="1.5" y="14.5" font-size="7.5" font-weight="700" fill="currentColor" stroke="none">2</text><text x="1.5" y="20.5" font-size="7.5" font-weight="700" fill="currentColor" stroke="none">3</text></svg>',
-   quote: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 17h3l2-4V7H5v6h3zm9 0h3l2-4V7h-6v6h3z"/></svg>',
-   link: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7L12 19"/></svg>',
-   unlink: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18.8 13.7l1.7-1.7a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M5.2 10.3L3.5 12a5 5 0 0 0 7 7l1.7-1.7"/><line x1="3" y1="3" x2="21" y2="21"/></svg>',
-   undo: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-5a6 6 0 0 0-6-6H4"/></svg>',
-   redo: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 14 20 9 15 4"/><path d="M4 20v-5a6 6 0 0 1 6-6h10"/></svg>',
-   clear: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V4h16v3"/><path d="M5 20h6"/><path d="M13 4L8 20"/><line x1="15" y1="12" x2="21" y2="18"/><line x1="21" y1="12" x2="15" y2="18"/></svg>',
-   alignLeft: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="14" y2="12"/><line x1="3" y1="18" x2="18" y2="18"/></svg>',
-   alignCenter: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="6" y1="12" x2="18" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>',
-   alignRight: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="10" y1="12" x2="21" y2="12"/><line x1="6" y1="18" x2="21" y2="18"/></svg>',
-   highlight: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l-4 4v3h3l4-4"/><path d="M14 6l4 4"/><path d="M12 8l4-4a2 2 0 0 1 3 3l-4 4z"/></svg>',
-   color: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l4 8H8z"/><path d="M8 11h8l-1.5 5h-5z"/><line x1="7" y1="21" x2="17" y2="21"/></svg>',
-   sub: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6l8 10M12 6L4 16"/><path d="M20 20h-4c0-1.5 1-2 2-2.5s2-1 2-2.2A1.3 1.3 0 0 0 17 14"/></svg>',
-   sup: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8l8 10M12 8L4 18"/><path d="M20 10h-4c0-1.5 1-2 2-2.5s2-1 2-2.2A1.3 1.3 0 0 0 17 4"/></svg>',
-}
-
 interface Tool {
    title: string
    label?: string
    labelClass?: string
-   icon?: string
+   icon?: Component
    run: () => void
    active?: () => boolean
    disabled?: () => boolean
@@ -151,21 +139,21 @@ const tools = computed<Tool[]>(() => {
       { title: 'Gạch ngang', label: 'S', labelClass: 'line-through font-semibold', run: () => e.chain().focus().toggleStrike().run(), active: () => e.isActive('strike') },
       { title: 'Tiêu đề lớn', label: 'H2', labelClass: 'font-extrabold text-[11px]', run: () => e.chain().focus().toggleHeading({ level: 2 }).run(), active: () => e.isActive('heading', { level: 2 }) },
       { title: 'Tiêu đề nhỏ', label: 'H3', labelClass: 'font-extrabold text-[11px]', run: () => e.chain().focus().toggleHeading({ level: 3 }).run(), active: () => e.isActive('heading', { level: 3 }) },
-      { title: 'Danh sách đầu dòng', icon: icons.bulletList, run: () => e.chain().focus().toggleBulletList().run(), active: () => e.isActive('bulletList') },
-      { title: 'Danh sách đánh số', icon: icons.orderedList, run: () => e.chain().focus().toggleOrderedList().run(), active: () => e.isActive('orderedList') },
-      { title: 'Trích dẫn', icon: icons.quote, run: () => e.chain().focus().toggleBlockquote().run(), active: () => e.isActive('blockquote') },
-      { title: 'Căn trái', icon: icons.alignLeft, run: () => e.chain().focus().setTextAlign('left').run(), active: () => e.isActive({ textAlign: 'left' }) },
-      { title: 'Căn giữa', icon: icons.alignCenter, run: () => e.chain().focus().setTextAlign('center').run(), active: () => e.isActive({ textAlign: 'center' }) },
-      { title: 'Căn phải', icon: icons.alignRight, run: () => e.chain().focus().setTextAlign('right').run(), active: () => e.isActive({ textAlign: 'right' }) },
-      { title: 'Màu chữ', icon: icons.color, run: () => togglePalette('color'), active: () => e.isActive('textStyle') },
-      { title: 'Bôi nền', icon: icons.highlight, run: () => togglePalette('highlight'), active: () => e.isActive('highlight') },
-      { title: 'Chỉ số dưới', icon: icons.sub, run: () => e.chain().focus().toggleSubscript().run(), active: () => e.isActive('subscript') },
-      { title: 'Chỉ số trên', icon: icons.sup, run: () => e.chain().focus().toggleSuperscript().run(), active: () => e.isActive('superscript') },
-      { title: 'Chèn link', icon: icons.link, run: openLinkForm, active: () => e.isActive('link') },
-      { title: 'Bỏ link', icon: icons.unlink, run: () => e.chain().focus().unsetLink().run(), disabled: () => !e.isActive('link') },
-      { title: 'Xóa định dạng', icon: icons.clear, run: () => e.chain().focus().unsetAllMarks().clearNodes().run() },
-      { title: 'Hoàn tác', icon: icons.undo, run: () => e.chain().focus().undo().run(), disabled: () => !e.can().undo() },
-      { title: 'Làm lại', icon: icons.redo, run: () => e.chain().focus().redo().run(), disabled: () => !e.can().redo() },
+      { title: 'Danh sách đầu dòng', icon: IconsBulletList, run: () => e.chain().focus().toggleBulletList().run(), active: () => e.isActive('bulletList') },
+      { title: 'Danh sách đánh số', icon: IconsOrderedList, run: () => e.chain().focus().toggleOrderedList().run(), active: () => e.isActive('orderedList') },
+      { title: 'Trích dẫn', icon: IconsQuote, run: () => e.chain().focus().toggleBlockquote().run(), active: () => e.isActive('blockquote') },
+      { title: 'Căn trái', icon: IconsAlignLeft, run: () => e.chain().focus().setTextAlign('left').run(), active: () => e.isActive({ textAlign: 'left' }) },
+      { title: 'Căn giữa', icon: IconsAlignCenter, run: () => e.chain().focus().setTextAlign('center').run(), active: () => e.isActive({ textAlign: 'center' }) },
+      { title: 'Căn phải', icon: IconsAlignRight, run: () => e.chain().focus().setTextAlign('right').run(), active: () => e.isActive({ textAlign: 'right' }) },
+      { title: 'Màu chữ', icon: IconsColor, run: () => togglePalette('color'), active: () => e.isActive('textStyle') },
+      { title: 'Bôi nền', icon: IconsHighlight, run: () => togglePalette('highlight'), active: () => e.isActive('highlight') },
+      { title: 'Chỉ số dưới', icon: IconsSubscript, run: () => e.chain().focus().toggleSubscript().run(), active: () => e.isActive('subscript') },
+      { title: 'Chỉ số trên', icon: IconsSuperscript, run: () => e.chain().focus().toggleSuperscript().run(), active: () => e.isActive('superscript') },
+      { title: 'Chèn link', icon: IconsLink, run: openLinkForm, active: () => e.isActive('link') },
+      { title: 'Bỏ link', icon: IconsUnlink, run: () => e.chain().focus().unsetLink().run(), disabled: () => !e.isActive('link') },
+      { title: 'Xóa định dạng', icon: IconsFormatClear, run: () => e.chain().focus().unsetAllMarks().clearNodes().run() },
+      { title: 'Hoàn tác', icon: IconsUndo, run: () => e.chain().focus().undo().run(), disabled: () => !e.can().undo() },
+      { title: 'Làm lại', icon: IconsRedo, run: () => e.chain().focus().redo().run(), disabled: () => !e.can().redo() },
    ]
 })
 
