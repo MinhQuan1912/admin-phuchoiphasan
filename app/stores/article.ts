@@ -5,6 +5,7 @@ import type {
   ArticleListFilters,
   ArticleStats,
   ArticleStatus,
+  CategoryKind,
   Paginated,
 } from "~/types";
 
@@ -21,8 +22,9 @@ export const useArticleStore = defineStore("article", () => {
   const filters = reactive<{
     status?: ArticleStatus;
     categoryId?: string;
+    kind?: CategoryKind;
     q: string;
-  }>({ status: undefined, categoryId: undefined, q: "" });
+  }>({ status: undefined, categoryId: undefined, kind: undefined, q: "" });
 
   let latestListReq = 0;
 
@@ -38,9 +40,11 @@ export const useArticleStore = defineStore("article", () => {
       const status = "status" in opts ? opts.status : filters.status;
       const categoryId =
         "categoryId" in opts ? opts.categoryId : filters.categoryId;
+      const kind = "kind" in opts ? opts.kind : filters.kind;
       const q = ("q" in opts ? opts.q ?? "" : filters.q).trim();
       if (status) query.status = status;
       if (categoryId) query.categoryId = categoryId;
+      if (kind) query.kind = kind;
       if (q) query.q = q;
 
       const res = await api<ApiResponse<Paginated<Article>>>(

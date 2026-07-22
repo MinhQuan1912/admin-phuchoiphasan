@@ -7,7 +7,7 @@
             :class="t.active?.() ? 'bg-primary/10 text-primary' : ''"
             @click="t.run">
             <span v-if="t.label" class="text-[13px] leading-none" :class="t.labelClass">{{ t.label }}</span>
-            <component :is="t.icon" v-else class="size-[15px]" />
+            <component :is="t.icon" v-else class="size-3.75" />
          </button>
       </div>
 
@@ -24,7 +24,7 @@
                   class="absolute inset-0 opacity-0 cursor-pointer">
             </label>
             <button type="button" title="Bỏ màu chữ" @click="clearColor"
-               class="h-6 px-2 rounded-md border border-gray-200 text-[11px] font-semibold text-gray-500 hover:text-primary hover:border-primary">
+               class="h-6 px-2 rounded-md border border-gray-200 text-[11px] font-semibold text-gray-500 hover:bg-gray-200 transition-colors">
                Bỏ màu
             </button>
          </template>
@@ -40,7 +40,7 @@
                   class="absolute inset-0 opacity-0 cursor-pointer">
             </label>
             <button type="button" title="Bỏ bôi nền" @click="clearHighlight"
-               class="h-6 px-2 rounded-md border border-gray-200 text-[11px] font-semibold text-gray-500 hover:text-primary hover:border-primary">
+               class="h-6 px-2 rounded-md border border-gray-200 text-[11px] font-semibold text-gray-500 hover:bg-gray-200 transition-colors">
                Bỏ nền
             </button>
          </template>
@@ -51,18 +51,18 @@
 
    <div v-if="linkForm" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
       @click.self="linkForm = null">
-      <div class="bg-white rounded-[14px] p-6 w-full max-w-[420px]">
+      <div class="bg-white rounded-[14px] p-6 w-full max-w-105">
          <h3 class="text-base font-extrabold">{{ linkForm.editing ? 'Sửa liên kết' : 'Chèn liên kết' }}</h3>
 
          <label class="block text-[13px] font-semibold mt-4 mb-1.5">Địa chỉ</label>
          <input ref="linkInput" v-model="linkForm.href" placeholder="https://vi.wikipedia.org/..."
             @keyup.enter="submitLink" @keyup.esc="linkForm = null"
-            class="w-full h-[42px] border border-gray-200 rounded-[10px] px-3.5 text-sm outline-none focus:border-primary transition-colors" />
+            class="w-full h-10.5 border border-gray-200 rounded-[10px] px-3.5 text-sm outline-none focus:border-primary transition-colors" />
 
          <div class="mt-5 flex justify-end gap-2.5">
-            <button type="button" class="h-10 px-4 bg-white border border-gray-200 rounded-[10px] font-semibold text-sm"
+            <button type="button" class="h-10 px-4 bg-white border border-gray-200 rounded-[10px] font-semibold text-sm hover:bg-gray-200 transition-colors"
                @click="linkForm = null">Hủy</button>
-            <button type="button" class="h-10 px-4 bg-primary text-white rounded-[10px] font-bold text-sm"
+            <button type="button" class="h-10 px-4 bg-primary text-white rounded-[10px] font-bold text-sm hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/30 hover:-translate-y-0.5 active:translate-y-0 transition-all"
                @click="submitLink">Lưu</button>
          </div>
       </div>
@@ -111,7 +111,7 @@ const editor = useEditor({
    ],
    editorProps: {
       attributes: {
-         class: 'tiptap-content p-3 text-sm leading-relaxed outline-none min-h-[120px]',
+         class: 'tiptap-content p-3 text-sm leading-relaxed outline-none min-h-30',
       },
    },
    onUpdate: ({ editor }) => {

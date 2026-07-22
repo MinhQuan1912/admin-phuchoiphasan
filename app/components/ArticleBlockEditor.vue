@@ -5,57 +5,75 @@
          Chưa có nội dung. Thêm đoạn văn bản hoặc ảnh bên dưới.
       </div>
 
-      <div v-for="(b, i) in blocks" :key="b.key" class="border border-gray-200 rounded-[10px] p-4">
-         <div class="mb-3 flex items-center justify-between">
-            <div class="flex items-center gap-2">
-               <span class="text-[11px] font-semibold px-2.5 py-1 rounded-full"
+      <div v-for="(b, i) in blocks" :key="b.key" :draggable="dragEnabled"
+         @dragstart="onDragStart(i, $event)" @dragover.prevent="onDragOver(i)" @drop="onDrop(i)"
+         @dragend="onDragEnd"
+         class="relative border border-gray-200 rounded-[10px] p-4 bg-white transition-all"
+         :class="dragIndex === i ? 'opacity-40' : ''">
+         <div v-if="overIndex === i && dragIndex !== null && dragIndex !== i"
+            class="absolute left-0 right-0 h-0.5 bg-primary rounded-full pointer-events-none"
+            :class="dragIndex > i ? '-top-1' : '-bottom-1'"></div>
+         <div class="flex items-center justify-between" :class="collapsed[b.key] ? '' : 'mb-3'">
+            <div class="flex items-center gap-2 min-w-0 flex-1">
+               <span title="Giữ và kéo để đổi vị trí" @mousedown="dragEnabled = true" @mouseup="dragEnabled = false"
+                  @mouseleave="dragEnabled = false"
+                  class="shrink-0 w-7 h-7 flex items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-600 cursor-grab active:cursor-grabbing select-none">
+                  <svg viewBox="0 0 20 20" fill="currentColor" class="size-3.75">
+                     <circle cx="7" cy="5" r="1.6" /><circle cx="13" cy="5" r="1.6" />
+                     <circle cx="7" cy="10" r="1.6" /><circle cx="13" cy="10" r="1.6" />
+                     <circle cx="7" cy="15" r="1.6" /><circle cx="13" cy="15" r="1.6" />
+                  </svg>
+               </span>
+               <span class="shrink-0 text-[11px] font-semibold px-2.5 py-1 rounded-full"
                   :class="b.type === 'TEXT' ? 'bg-primary/10 text-primary' : 'bg-emerald-50 text-emerald-700'">
                   {{ b.type === 'TEXT' ? 'Văn bản' : 'Hình ảnh' }}
                </span>
-               <span class="text-xs text-gray-500">#{{ i + 1 }}</span>
+               <span class="shrink-0 text-xs text-gray-500">#{{ i + 1 }}</span>
             </div>
-            <div class="flex items-center gap-1">
-               <button type="button" title="Lên" :disabled="i === 0" @click="move(i, -1)"
-                  class="w-7 h-7 flex items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 hover:text-primary disabled:opacity-30 disabled:hover:bg-transparent">
-                  <IconsChevronUp class="size-[15px]" />
-               </button>
-               <button type="button" title="Xuống" :disabled="i === blocks.length - 1" @click="move(i, 1)"
-                  class="w-7 h-7 flex items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 hover:text-primary disabled:opacity-30 disabled:hover:bg-transparent">
-                  <IconsChevronDown class="size-[15px]" />
+            <div class="shrink-0 flex items-center gap-1">
+               <button type="button" :title="collapsed[b.key] ? 'Mở rộng' : 'Thu gọn'" @click="toggleCollapse(b.key)"
+                  class="w-7 h-7 flex items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 hover:text-primary cursor-pointer">
+                  <IconsChevronDown class="size-3.75 transition-transform" :class="collapsed[b.key] ? '-rotate-90' : ''" />
                </button>
                <button type="button" title="Xóa khối" @click="remove(i)"
-                  class="w-7 h-7 flex items-center justify-center rounded-md text-gray-500 hover:bg-rose-50 hover:text-rose-800">
-                  <IconsTrash class="size-[15px]" />
+                  class="w-7 h-7 flex items-center justify-center rounded-md text-gray-500 hover:bg-rose-50 hover:text-rose-800 cursor-pointer">
+                  <IconsTrash class="size-3.75" />
                </button>
             </div>
          </div>
 
-         <RichTextEditor v-if="b.type === 'TEXT'" v-model="b.content" placeholder="Nhập nội dung đoạn văn..." />
+         <p v-if="collapsed[b.key] && preview(b)" class="mt-2 truncate text-xs text-gray-400">
+            {{ preview(b) }}
+         </p>
 
-         <div v-else class="space-y-3">
-            <img v-if="b.preview || b.content" :src="b.preview || b.content"
-               class="max-h-56 rounded-[10px] border border-gray-200 object-contain">
-            <input type="file" accept="image/*"
-               class="block w-full text-sm text-gray-500 file:mr-3 file:rounded-md file:border-0 file:bg-primary file:px-3 file:py-1.5 file:text-white file:font-semibold file:cursor-pointer"
-               @change="e => onPickImage(i, e)">
-            <p v-if="b.content && !b.file" class="text-xs text-gray-500">
-               Ảnh hiện tại (giữ nguyên nếu không chọn ảnh mới)
-            </p>
+         <div v-show="!collapsed[b.key]">
+            <RichTextEditor v-if="b.type === 'TEXT'" v-model="b.content" placeholder="Nhập nội dung đoạn văn..." />
 
-            <input v-model="b.caption" type="text" placeholder="Tiêu đề ảnh (không bắt buộc)"
-               class="w-full h-[38px] border border-gray-200 rounded-[10px] px-3 text-sm outline-none focus:border-primary transition-colors">
+            <div v-else class="space-y-3">
+               <img v-if="b.preview || b.content" :src="b.preview || b.content"
+                  class="max-w-full max-h-56 rounded-[10px] border border-gray-200 object-contain">
+               <input type="file" accept="image/*"
+                  class="block w-full text-sm text-gray-500 file:mr-3 file:rounded-md file:border-0 file:bg-primary file:px-3 file:py-1.5 file:text-white file:font-semibold file:cursor-pointer"
+                  @change="e => onPickImage(i, e)">
+               <p v-if="b.content && !b.file" class="text-xs text-gray-500">
+                  Ảnh hiện tại (giữ nguyên nếu không chọn ảnh mới)
+               </p>
+
+               <input v-model="b.caption" type="text" placeholder="Tiêu đề ảnh (không bắt buộc)"
+                  class="w-full h-9.5 border border-gray-200 rounded-[10px] px-3 text-sm outline-none focus:border-primary transition-colors">
+            </div>
          </div>
       </div>
-
+      
       <div class="flex gap-2">
          <button type="button" @click="addText"
-            class="h-[38px] inline-flex items-center gap-2 px-3.5 bg-white border border-gray-200 rounded-[10px] font-semibold text-[13px] hover:border-primary hover:text-primary transition-colors">
-            <IconsText class="size-[15px]" />
+            class="h-9.5 inline-flex items-center gap-2 px-3.5 bg-white border border-gray-200 rounded-[10px] font-semibold text-[13px] hover:bg-gray-200 transition-colors">
+            <IconsText class="size-3.75" />
             Thêm văn bản
          </button>
          <button type="button" @click="addImage"
-            class="h-[38px] inline-flex items-center gap-2 px-3.5 bg-white border border-gray-200 rounded-[10px] font-semibold text-[13px] hover:border-primary hover:text-primary transition-colors">
-            <IconsImage class="size-[15px]" />
+            class="h-9.5 inline-flex items-center gap-2 px-3.5 bg-white border border-gray-200 rounded-[10px] font-semibold text-[13px] hover:bg-gray-200 transition-colors">
+            <IconsImage class="size-3.75" />
             Thêm ảnh
          </button>
       </div>
@@ -67,8 +85,48 @@ import type { EditorBlock } from '~/types'
 
 const blocks = defineModel<EditorBlock[]>({ required: true })
 
+const collapsed = reactive<Record<string, boolean>>({})
+const dragEnabled = ref(false)
+const dragIndex = ref<number | null>(null)
+const overIndex = ref<number | null>(null)
+
 function uid() {
    return Math.random().toString(36).slice(2, 10)
+}
+
+function toggleCollapse(key: string) {
+   collapsed[key] = !collapsed[key]
+}
+
+function preview(b: EditorBlock) {
+   if (b.type === 'IMAGE') return b.caption?.trim() || ''
+   return (b.content || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
+}
+
+function onDragStart(i: number, e: DragEvent) {
+   dragIndex.value = i
+   if (e.dataTransfer) {
+      e.dataTransfer.effectAllowed = 'move'
+      e.dataTransfer.setData('text/plain', String(i))
+   }
+}
+
+function onDragOver(i: number) {
+   overIndex.value = i
+}
+
+function onDrop(target: number) {
+   const from = dragIndex.value
+   if (from === null || from === target) return
+   const arr = blocks.value
+   const [item] = arr.splice(from, 1)
+   arr.splice(target, 0, item!)
+}
+
+function onDragEnd() {
+   dragIndex.value = null
+   overIndex.value = null
+   dragEnabled.value = false
 }
 
 function addText() {
@@ -83,13 +141,6 @@ function remove(i: number) {
    const b = blocks.value[i]
    if (b?.preview) URL.revokeObjectURL(b.preview)
    blocks.value.splice(i, 1)
-}
-
-function move(i: number, dir: -1 | 1) {
-   const j = i + dir
-   if (j < 0 || j >= blocks.value.length) return
-   const arr = blocks.value
-      ;[arr[i], arr[j]] = [arr[j]!, arr[i]!]
 }
 
 function onPickImage(i: number, e: Event) {

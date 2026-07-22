@@ -8,9 +8,9 @@
          <div class="relative h-full flex flex-col justify-center px-14 text-white">
             <div class="flex items-center gap-3 mb-7">
                <div
-                  class="w-[46px] h-[46px] rounded-[11px] bg-white text-primary flex items-center justify-center font-extrabold text-base">
+                  class="w-11.5 h-11.5 rounded-[11px] bg-white text-primary flex items-center justify-center font-extrabold text-base">
                   QTV</div>
-               <div class="font-extrabold text-lg">Quản Tài Viên VN</div>
+               <div class="font-extrabold text-lg">Công ty Hợp danh Quản lý và Thanh lý tài sản VN</div>
             </div>
             <h2 class="text-[34px] font-extrabold tracking-tight leading-tight max-w-md mb-3.5">Trang quản trị nội
                dung</h2>
@@ -20,28 +20,22 @@
          </div>
       </div>
 
-      <div class="flex items-center justify-center p-10">
+      <div class="flex items-center justify-center p-6 sm:p-10">
 
          <div class="w-full max-w-sm">
             <div class="flex items-center gap-2.5 mb-7">
                <div
-                  class="w-10 h-10 rounded-[10px] bg-primary text-white flex items-center justify-center font-extrabold text-[14px]">
+                  class="w-10 h-10 rounded-[10px] bg-primary text-white flex items-center justify-center font-extrabold text-sm">
                   QTV</div>
                <span class="font-extrabold text-base">Admin</span>
             </div>
 
-            <ForgotPasswordForm v-if="step === 'forgot'" :email="state.email" @sent="onOtpSent"
-               @back="step = 'login'" />
-
-            <ResetPasswordForm v-else-if="step === 'reset'" :email="resetEmail" @done="onResetDone"
-               @back="step = 'login'" />
-
-            <UForm v-else :validate="validate" :validate-on="validateOn" :state="state" class="space-y-4"
+            <UForm :validate="validate" :validate-on="validateOn" :state="state" class="space-y-4"
                @submit="onSubmit" @error="onError">
                <h1 class="text-[26px] font-extrabold tracking-tight mb-1.5">Đăng nhập</h1>
                <p class="text-sm text-gray-500 mb-6.5">Nhập thông tin tài khoản quản trị của bạn.</p>
-               <UFormField label="Email" name="email" required>
-                  <UInput v-model="state.email" type="email" placeholder="admin@example.com" icon="i-lucide-mail"
+               <UFormField label="Tài khoản" name="username" required>
+                  <UInput v-model="state.username" type="text" placeholder="admin" icon="i-lucide-user"
                      class="w-full" size="xl" :disabled="loading" />
                </UFormField>
 
@@ -55,10 +49,6 @@
                      </template>
                   </UInput>
                </UFormField>
-
-               <div class="flex justify-end">
-                  <button type="button" class="text-sm text-primary" @click="step = 'forgot'">Quên mật khẩu?</button>
-               </div>
 
                <UButton type="submit" block :loading="loading" label="Đăng nhập" />
             </UForm>
@@ -77,32 +67,16 @@ const auth = useAuthStore()
 const route = useRoute()
 const toast = useToastMessage()
 
-const state = reactive({ email: '', password: '' })
+const state = reactive({ username: '', password: '' })
 const loading = ref(false)
 const showPass = ref(false)
-
-const step = ref<'login' | 'forgot' | 'reset'>('login')
-const resetEmail = ref('')
-
-function onOtpSent(email: string) {
-   resetEmail.value = email
-   step.value = 'reset'
-}
-
-function onResetDone() {
-   state.email = resetEmail.value
-   state.password = ''
-   submitted.value = false
-   step.value = 'login'
-}
 
 const submitted = ref(false)
 const validateOn = computed<any[]>(() => (submitted.value ? ['input'] : []))
 
 function validate(s: typeof state) {
    const errors: { name: string; message: string }[] = []
-   if (!s.email) errors.push({ name: 'email', message: 'Vui lòng nhập email' })
-   else if (!/^\S+@\S+\.\S+$/.test(s.email)) errors.push({ name: 'email', message: 'Email không hợp lệ' })
+   if (!s.username) errors.push({ name: 'username', message: 'Vui lòng nhập tài khoản' })
    if (!s.password) errors.push({ name: 'password', message: 'Vui lòng nhập mật khẩu' })
    else if (s.password.length < 6) errors.push({ name: 'password', message: 'Mật khẩu tối thiểu 6 ký tự' })
    return errors
@@ -116,7 +90,7 @@ async function onSubmit(_e: FormSubmitEvent<typeof state>) {
    submitted.value = true
    loading.value = true
    try {
-      const msg = await auth.login(state.email, state.password)
+      const msg = await auth.login(state.username, state.password)
       toast.success(msg)
       await navigateTo((route.query.redirect as string) || '/')
    } catch (e: any) {

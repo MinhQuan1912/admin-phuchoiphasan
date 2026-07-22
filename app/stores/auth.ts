@@ -20,13 +20,13 @@ export const useAuthStore = defineStore("auth", () => {
     else localStorage.removeItem(TOKEN_KEY);
   }
 
-  async function login(email: string, password: string) {
+  async function login(username: string, password: string) {
     const api = useApi();
     const res = await api<ApiResponse<{ accessToken: string }>>(
       "/auth/admin/login",
       {
         method: "POST",
-        body: { email, password },
+        body: { username, password },
       },
     );
     setToken(res.data!.accessToken);
@@ -59,28 +59,6 @@ export const useAuthStore = defineStore("auth", () => {
     return res.message;
   }
 
-  async function forgotPassword(email: string) {
-    const api = useApi();
-    const res = await api<ApiResponse>("/auth/admin/forgot-password", {
-      method: "POST",
-      body: { email },
-    });
-    return res.message;
-  }
-
-  async function resetPassword(
-    email: string,
-    otp: string,
-    newPassword: string,
-  ) {
-    const api = useApi();
-    const res = await api<ApiResponse>("/auth/admin/reset-password", {
-      method: "POST",
-      body: { email, otp, newPassword },
-    });
-    return res.message;
-  }
-
   return {
     token,
     admin,
@@ -91,7 +69,5 @@ export const useAuthStore = defineStore("auth", () => {
     fetchMe,
     logout,
     changePassword,
-    forgotPassword,
-    resetPassword,
   };
 });

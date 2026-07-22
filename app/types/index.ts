@@ -14,18 +14,27 @@ export interface Paginated<T> {
 
 export interface Admin {
   id: string;
-  email: string;
+  username: string;
 }
 
 export type BlockType = "TEXT" | "IMAGE";
 
 export type ArticleStatus = "DRAFT" | "PUBLISHED";
 
+// Phân loại nội dung: NEWS (tin tức) hoặc NOTICE (thông báo phá sản)
+export type CategoryKind = "NEWS" | "NOTICE";
+
+export const KIND_LABEL: Record<CategoryKind, string> = {
+  NEWS: "Tin tức",
+  NOTICE: "Thông báo",
+};
+
 // Chuyên mục rút gọn, đúng những gì API nhúng trong bài viết
 export interface CategoryRef {
   id: string;
   name: string;
   slug: string;
+  kind: CategoryKind;
 }
 
 // Bản đầy đủ, chỉ GET /categories mới trả về
@@ -63,6 +72,7 @@ export interface ArticleStats {
   published: number;
   draft: number;
   categories: number;
+  notices: number;
 }
 
 export interface ArticleListFilters {
@@ -70,6 +80,7 @@ export interface ArticleListFilters {
   limit?: number;
   status?: ArticleStatus;
   categoryId?: string;
+  kind?: CategoryKind;
   q?: string;
 }
 

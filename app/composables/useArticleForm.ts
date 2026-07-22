@@ -11,7 +11,6 @@ export function useArticleForm() {
     description?: string;
     categoryId?: string;
     status?: ArticleStatus;
-    slug?: string;
     thumbnailFile?: File | null;
     blocks?: EditorBlock[] | null;
   }): FormData {
@@ -23,7 +22,6 @@ export function useArticleForm() {
     if (payload.categoryId !== undefined)
       fd.append("categoryId", payload.categoryId);
     if (payload.status !== undefined) fd.append("status", payload.status);
-    if (payload.slug) fd.append("slug", payload.slug);
     if (payload.thumbnailFile) fd.append("thumbnail", payload.thumbnailFile);
 
     if (payload.blocks) {
@@ -62,7 +60,7 @@ export function useArticleForm() {
     if (!isEdit && !form.thumbnailFile) return "Vui lòng chọn ảnh đại diện";
     if (isEdit && !form.thumbnailFile && !form.thumbnailUrl)
       return "Thiếu ảnh đại diện";
-    if (!form.blocks.length) return "Bài viết cần ít nhất 1 khối nội dung";
+    if (!form.blocks.length) return "Vui lòng nhập nội dung";
 
     for (const [i, b] of form.blocks.entries()) {
       if (b.type === "TEXT" && !b.content.trim())

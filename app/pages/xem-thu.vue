@@ -2,8 +2,8 @@
    <div>
       <div class="sticky top-0 z-10 h-14 px-5 flex items-center justify-between gap-3 bg-white border-b border-gray-200">
          <button type="button" @click="closeTab"
-            class="h-9 px-3.5 shrink-0 inline-flex items-center gap-1.5 border border-gray-200 rounded-[10px] font-semibold text-[13px] hover:border-primary hover:text-primary transition-colors">
-            <IconsClose class="size-[15px]" />
+            class="h-9 px-3.5 shrink-0 inline-flex items-center gap-1.5 border border-gray-200 rounded-[10px] font-semibold text-[13px] hover:bg-gray-200 transition-colors">
+            <IconsClose class="size-3.75" />
             Đóng tab
          </button>
       </div>

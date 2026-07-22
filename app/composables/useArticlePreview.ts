@@ -1,7 +1,7 @@
 import type { ArticlePreviewDraft, EditorBlock } from "~/types";
 
 export const PREVIEW_DRAFT_KEY = "phts_article_preview";
-const PREVIEW_ROUTE = "/bai-viet/xem-thu";
+const PREVIEW_ROUTE = "/xem-thu";
 
 export function useArticlePreview() {
   function openPreview(draft: {

@@ -1,12 +1,11 @@
 <template>
    <div>
-      <!-- KPI -->
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-[18px] mb-6">
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4.5 mb-6">
          <div v-for="k in kpis" :key="k.label" class="bg-white border border-gray-200 rounded-[14px] p-5">
             <div class="flex items-center justify-between">
                <span class="text-[13px] text-gray-500">{{ k.label }}</span>
-               <span class="w-[34px] h-[34px] rounded-[9px] bg-primary/10 text-primary flex items-center justify-center">
-                  <component :is="k.icon" class="size-[17px]" />
+               <span class="w-8.5 h-8.5 rounded-[9px] bg-primary/10 text-primary flex items-center justify-center">
+                  <component :is="k.icon" class="size-4.25" />
                </span>
             </div>
             <div v-if="loading" class="h-9 w-16 mt-2.5 rounded-md bg-gray-100 animate-pulse"></div>
@@ -15,14 +14,13 @@
          </div>
       </div>
 
-      <!-- Recent posts -->
       <div class="bg-white border border-gray-200 rounded-[14px] p-5">
          <div class="flex items-center justify-between mb-1.5">
             <div class="flex items-center gap-2.5">
                <span class="w-1 h-5 bg-primary rounded-sm"></span>
-               <h3 class="text-base font-extrabold">Bài viết mới nhất</h3>
+               <h3 class="text-base font-extrabold">Tin tức mới nhất</h3>
             </div>
-            <NuxtLink to="/bai-viet" class="text-[13px] font-semibold text-primary">Xem tất cả →</NuxtLink>
+            <NuxtLink to="/tin-tuc" class="text-[13px] font-semibold text-primary">Xem tất cả →</NuxtLink>
          </div>
 
          <div v-if="loading" class="py-3.5">
@@ -32,11 +30,11 @@
          </div>
 
          <p v-else-if="!store.items.length" class="py-10 text-center text-sm text-gray-500">
-            Chưa có bài viết nào.
-            <NuxtLink to="/bai-viet/create" class="font-semibold text-primary">Tạo bài đầu tiên</NuxtLink>
+            Chưa có tin tức nào.
+            <NuxtLink to="/tin-tuc/create" class="font-semibold text-primary">Tạo tin đầu tiên</NuxtLink>
          </p>
 
-         <NuxtLink v-for="p in store.items" v-else :key="p.id" :to="`/bai-viet/${p.id}`"
+         <NuxtLink v-for="p in store.items" v-else :key="p.id" :to="`/tin-tuc/${p.id}`"
             class="flex items-center gap-3.5 py-3.5 border-t border-gray-100 first:border-t-0 hover:bg-gray-50/60 transition-colors">
             <img :src="p.thumbnail" :alt="p.title" class="w-14 h-10 shrink-0 rounded-lg object-cover bg-gray-100">
             <div class="flex-1 min-w-0">
@@ -52,7 +50,7 @@
 </template>
 
 <script setup lang="ts">
-import { IconsCheck, IconsEdit, IconsPosts, IconsTag } from '#components'
+import { IconsAnnouncements, IconsCheck, IconsEdit, IconsPosts } from '#components'
 import { useToastMessage } from '~/composables/useToastMessage'
 import { useArticleStore } from '~/stores/article'
 import { STATUS_LABEL, type ArticleStatus } from '~/types'
@@ -65,10 +63,10 @@ const toast = useToastMessage()
 const loading = ref(true)
 
 const kpis = computed(() => [
-   { label: 'Tổng bài viết', value: store.stats?.total ?? 0, hint: 'Toàn bộ bài viết', icon: IconsPosts },
+   { label: 'Tổng tin tức', value: store.stats?.total ?? 0, hint: 'Toàn bộ tin tức', icon: IconsPosts },
    { label: 'Đã đăng', value: store.stats?.published ?? 0, hint: 'Đang hiển thị trên website', icon: IconsCheck },
    { label: 'Bản nháp', value: store.stats?.draft ?? 0, hint: 'Chưa hiển thị công khai', icon: IconsEdit },
-   { label: 'Chuyên mục', value: store.stats?.categories ?? 0, hint: 'Số chuyên mục đang có', icon: IconsTag },
+   { label: 'Thông báo', value: store.stats?.notices ?? 0, hint: 'Số thông báo đang có', icon: IconsAnnouncements },
 ])
 
 onMounted(async () => {
