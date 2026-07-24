@@ -38,17 +38,27 @@
          <div class="bg-white border border-gray-200 rounded-[14px] p-5">
             <h3 class="text-[15px] font-extrabold mb-3.5">Phân loại</h3>
             <label class="block text-[13px] font-semibold mb-1.5">Loại</label>
-            <div class="grid grid-cols-2 gap-1 p-1 bg-gray-100 rounded-[10px] mb-3.5">
+            <div class="grid grid-cols-3 gap-1 p-1 bg-gray-100 rounded-[10px] mb-3.5">
                <button v-for="k in kindOptions" :key="k.value" type="button" @click="onSelectKind(k.value)"
                   class="h-8.5 inline-flex items-center justify-center rounded-[7px] text-[13px] font-semibold transition-colors"
                   :class="kind === k.value ? 'bg-white text-primary shadow-sm' : 'text-gray-500 hover:text-gray-900'">
                   {{ k.label }}
                </button>
             </div>
-            <label class="block text-[13px] font-semibold mb-1.5">Chuyên mục</label>
-            <USelect v-model="categoryId" :items="categoryItems" :disabled="!kindCategories.length"
-               :placeholder="kindCategories.length ? 'Chọn chuyên mục' : 'Đang tải...'" size="lg" variant="outline"
-               class="w-full" :ui="{ base: 'rounded-[10px] h-10.5' }" />
+            <!-- Sự kiện không có chuyên mục — dùng chuyên mục cố định ẩn, tự gán -->
+            <template v-if="kind !== 'EVENT'">
+               <label class="block text-[13px] font-semibold mb-1.5">Chuyên mục</label>
+               <USelect v-model="categoryId" :items="categoryItems" :disabled="!kindCategories.length"
+                  :placeholder="kindCategories.length ? 'Chọn chuyên mục' : 'Đang tải...'" size="lg" variant="outline"
+                  class="w-full" :ui="{ base: 'rounded-[10px] h-10.5' }" />
+            </template>
+
+            <!-- Tòa chuyên trách — chỉ dùng cho thông báo phá sản -->
+            <template v-if="kind === 'NOTICE'">
+               <label class="block text-[13px] font-semibold mt-3.5 mb-1.5">Tòa chuyên trách</label>
+               <USelect v-model="court" :items="courtItems" placeholder="Chọn tòa chuyên trách" size="lg"
+                  variant="outline" class="w-full" :ui="{ base: 'rounded-[10px] h-10.5' }" />
+            </template>
          </div>
 
          <div class="bg-white border border-gray-200 rounded-[14px] p-5">
@@ -91,7 +101,7 @@ import { useArticleForm } from '~/composables/useArticleForm'
 import { useArticlePreview } from '~/composables/useArticlePreview'
 import { useToastMessage } from '~/composables/useToastMessage'
 import { useCategoryStore } from '~/stores/category'
-import { KIND_LABEL, type ArticleStatus, type CategoryKind, type EditorBlock } from '~/types'
+import { COURT_LABEL, KIND_LABEL, type ArticleStatus, type CategoryKind, type Court, type EditorBlock } from '~/types'
 
 const props = defineProps<{
    isEdit?: boolean
@@ -105,6 +115,7 @@ const props = defineProps<{
    initialKind?: CategoryKind
    initialStatus?: ArticleStatus
    initialBlocks?: EditorBlock[]
+   initialCourt?: Court | ''
 }>()
 
 const basePath = computed(() => props.basePath ?? '/tin-tuc')
@@ -117,6 +128,7 @@ const emit = defineEmits<{
       status: ArticleStatus
       thumbnailFile: File | null
       blocks: EditorBlock[]
+      court: string
    }]
 }>()
 
@@ -130,6 +142,9 @@ const description = ref(props.initialDescription ?? '')
 const categoryId = ref(props.initialCategoryId ?? '')
 const kind = ref<CategoryKind>(props.initialKind ?? props.defaultKind ?? 'NEWS')
 const status = ref<ArticleStatus>(props.initialStatus ?? 'DRAFT')
+// Tòa chuyên trách — chỉ áp dụng cho thông báo phá sản (kind = NOTICE)
+const court = ref<Court | undefined>(props.initialCourt || undefined)
+const courtItems = (Object.keys(COURT_LABEL) as Court[]).map(v => ({ label: COURT_LABEL[v], value: v }))
 const thumbnailFile = ref<File | null>(null)
 const thumbnailPreview = ref<string>('')
 const blocks = ref<EditorBlock[]>(props.initialBlocks ? [...props.initialBlocks] : [])
@@ -143,6 +158,7 @@ const selectedCategory = computed(() => categories.value.find(c => c.id === cate
 const kindOptions: { value: CategoryKind; label: string }[] = [
    { value: 'NEWS', label: KIND_LABEL.NEWS },
    { value: 'NOTICE', label: KIND_LABEL.NOTICE },
+   { value: 'EVENT', label: KIND_LABEL.EVENT },
 ]
 
 const statusOptions: { value: ArticleStatus; label: string; icon: Component }[] = [
@@ -169,6 +185,7 @@ watch(() => props.initialKind, v => v !== undefined && (kind.value = v))
 watch(() => props.initialCategoryId, v => v !== undefined && (categoryId.value = v))
 watch(() => props.initialStatus, v => v !== undefined && (status.value = v))
 watch(() => props.initialBlocks, v => v && (blocks.value = [...v]))
+watch(() => props.initialCourt, v => v !== undefined && (court.value = v || undefined))
 
 const displayThumbnail = computed(() => thumbnailPreview.value || props.initialThumbnailUrl || '')
 
@@ -220,6 +237,8 @@ function onSubmit() {
       status: status.value,
       thumbnailFile: thumbnailFile.value,
       blocks: blocks.value,
+      // Tin tức không có tòa chuyên trách — gửi rỗng để backend lưu null
+      court: kind.value === 'NOTICE' ? (court.value ?? '') : '',
    })
 }
 

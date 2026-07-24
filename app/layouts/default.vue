@@ -3,7 +3,7 @@
       <div v-if="mobileOpen" class="fixed inset-0 z-40 bg-black/50 lg:hidden" @click="mobileOpen = false"></div>
 
       <aside :class="[
-         'bg-[#0f1e35] text-white flex flex-col shrink-0 z-50 h-screen transition-all duration-300 ease-in-out',
+         'bg-gray-900 text-white flex flex-col shrink-0 z-50 h-screen transition-all duration-300 ease-in-out',
          'fixed inset-y-0 left-0 w-62 lg:sticky lg:top-0 lg:translate-x-0',
          sidebarOpen ? 'lg:w-62' : 'lg:w-18',
          mobileOpen ? 'translate-x-0' : '-translate-x-full',
@@ -121,6 +121,7 @@ async function onLogout() {
 const menu = [
    { to: '/', label: 'Tổng quan', icon: IconsDashboard, exact: true },
    { to: '/tin-tuc', label: 'Tin tức', icon: IconsPosts },
+   { to: '/su-kien', label: 'Sự kiện', icon: IconsPosts },
    { to: '/chuyen-muc', label: 'Chuyên mục', icon: IconsTag },
    { to: '/thong-bao-pha-san', label: 'Thông báo', icon: IconsAnnouncements },
 ]
@@ -135,6 +136,9 @@ const meta = computed(() => {
    if (p === '/tin-tuc/create') return ['Soạn tin tức', 'Trình soạn thảo nội dung']
    if (p.startsWith('/tin-tuc/')) return ['Sửa tin tức', 'Trình soạn thảo nội dung']
    if (p.startsWith('/tin-tuc')) return ['Quản lý tin tức', 'Danh sách toàn bộ tin tức']
+   if (p === '/su-kien/create') return ['Soạn sự kiện', 'Trình soạn thảo nội dung']
+   if (p.startsWith('/su-kien/')) return ['Sửa sự kiện', 'Trình soạn thảo nội dung']
+   if (p.startsWith('/su-kien')) return ['Quản lý sự kiện', 'Danh sách toàn bộ sự kiện']
    if (p.startsWith('/chuyen-muc')) return ['Chuyên mục', 'Phân loại bài viết']
    if (p === '/thong-bao-pha-san/create') return ['Thêm thông báo', 'Soạn thông báo phá sản']
    if (p.startsWith('/thong-bao-pha-san/')) return ['Sửa thông báo', 'Soạn thông báo phá sản']

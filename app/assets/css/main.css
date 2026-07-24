@@ -3,7 +3,8 @@
 
 @theme static {
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
-  --color-primary: #5772ff;
+  /* Đồng bộ tông màu với Frontend (Frontend/app/assets/theme/color.css) */
+  --color-primary: #32c259;
 }
 
 textarea {

@@ -95,7 +95,7 @@ useHead({ title: 'Chuyên mục · Quản trị' })
 const store = useCategoryStore()
 const toast = useToastMessage()
 
-// Trang này chỉ quản lý chuyên mục Tin tức; 2 chuyên mục Thông báo là cố định
+// Trang này chỉ quản lý chuyên mục Tin tức; chuyên mục Thông báo và Sự kiện là cố định (seed)
 const newsCategories = computed(() => store.items.filter(c => c.kind === 'NEWS'))
 
 const firstLoad = ref(true)

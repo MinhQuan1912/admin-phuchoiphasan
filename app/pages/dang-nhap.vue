@@ -104,6 +104,6 @@ async function onSubmit(_e: FormSubmitEvent<typeof state>) {
 <style scoped>
 
 .login-overlay {
-   background: linear-gradient(140deg, rgba(8, 16, 30, 0.94), color-mix(in srgb, var(--color-primary, #5772ff) 66%, transparent));
+   background: linear-gradient(140deg, rgba(3, 7, 18, 0.94), color-mix(in srgb, var(--color-primary, #32c259) 66%, transparent));
 }
 </style>

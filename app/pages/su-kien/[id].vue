@@ -1,6 +1,6 @@
 <template>
    <div>
-      <NuxtLink to="/thong-bao-pha-san"
+      <NuxtLink to="/su-kien"
          class="inline-flex items-center gap-1.5 text-[13px] font-semibold text-gray-500 hover:text-primary transition-colors mb-4">
          <IconsChevronLeft class="size-3.75" />
          Quay lại danh sách
@@ -11,10 +11,10 @@
          <div class="h-80 rounded-[14px] bg-gray-100 animate-pulse"></div>
       </div>
 
-      <ArticleForm v-else is-edit base-path="/thong-bao-pha-san" :loading="loading" :initial-title="article.title"
+      <ArticleForm v-else is-edit base-path="/su-kien" :loading="loading" :initial-title="article.title"
          :initial-description="article.description" :initial-thumbnail-url="article.thumbnail"
          :initial-category-id="article.categoryId" :initial-kind="article.category.kind"
-         :initial-status="article.status" :initial-blocks="initialBlocks" :initial-court="article.court ?? ''"
+         :initial-status="article.status" :initial-blocks="initialBlocks"
          @submit="onSubmit" />
    </div>
 </template>
@@ -26,7 +26,7 @@ import { useArticleStore } from '~/stores/article'
 import type { Article, ArticleStatus, EditorBlock } from '~/types'
 
 definePageMeta({ middleware: 'auth' })
-useHead({ title: 'Sửa thông báo · Quản trị' })
+useHead({ title: 'Sửa sự kiện · Quản trị' })
 
 const route = useRoute()
 const store = useArticleStore()
@@ -47,7 +47,7 @@ onMounted(async () => {
       }
    } catch (e: any) {
       toast.error(e.message)
-      await navigateTo('/thong-bao-pha-san')
+      await navigateTo('/su-kien')
    }
 })
 
@@ -58,14 +58,13 @@ async function onSubmit(payload: {
    status: ArticleStatus
    thumbnailFile: File | null
    blocks: EditorBlock[]
-   court: string
 }) {
    loading.value = true
    try {
       const fd = buildArticleFormData(payload)
       const res = await store.update(id, fd)
       toast.success(res.message)
-      await navigateTo('/thong-bao-pha-san')
+      await navigateTo('/su-kien')
    } catch (e: any) {
       toast.error(e.message)
    } finally {

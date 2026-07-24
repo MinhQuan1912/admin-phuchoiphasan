@@ -21,15 +21,16 @@
             @click="onChangeStatus(s.value)">
             {{ s.label }}
          </button>
-         <USelect v-model="selectedCategoryId" :items="categoryItems" :placeholder="allCategoriesLabel"
-            size="md" variant="outline"
+         <!-- Sự kiện dùng 1 chuyên mục cố định ẩn nên không cần lọc -->
+         <USelect v-if="kind !== 'EVENT'" v-model="selectedCategoryId" :items="categoryItems"
+            :placeholder="allCategoriesLabel" size="md" variant="outline"
             class="ml-auto min-w-45 max-w-full rounded-full"
             :ui="{ base: 'rounded-full font-semibold', content: 'rounded-xl' }" />
       </div>
 
       <div class="bg-white border border-gray-200 rounded-[14px] overflow-x-auto">
-         <div class="grid min-w-205 grid-cols-[1fr_150px_130px_120px_90px] gap-4 items-center px-5 py-3.5 bg-gray-100 uppercase tracking-wide text-[11px] font-bold text-gray-500">
-            <div>Tiêu đề</div><div>Chuyên mục</div><div>Ngày</div><div>Trạng thái</div><div class="text-right">Thao tác</div>
+         <div class="grid min-w-205 gap-4 items-center px-5 py-3.5 bg-gray-100 uppercase tracking-wide text-[11px] font-bold text-gray-500" :class="gridCols">
+            <div>Tiêu đề</div><div v-if="kind !== 'EVENT'">Chuyên mục</div><div>Ngày</div><div>Trạng thái</div><div class="text-right">Thao tác</div>
          </div>
 
          <div v-if="firstLoad" class="p-5 space-y-3">
@@ -44,14 +45,15 @@
          <div v-else :aria-busy="store.loading" class="transition-opacity duration-150"
             :class="store.loading ? 'opacity-60' : 'opacity-100'">
             <div v-for="p in store.items" :key="p.id"
-               class="grid min-w-205 grid-cols-[1fr_150px_130px_120px_90px] gap-4 items-center px-5 py-3.5 border-t border-gray-100 hover:bg-gray-50/60 transition-colors">
+               class="grid min-w-205 gap-4 items-center px-5 py-3.5 border-t border-gray-100 hover:bg-gray-50/60 transition-colors"
+               :class="gridCols">
                <div class="flex items-center gap-3 min-w-0">
                   <img :src="p.thumbnail" :alt="p.title" class="w-12 h-8.5 shrink-0 rounded-md object-cover bg-gray-100">
                   <div class="min-w-0">
                      <NuxtLink :to="`${basePath}/${p.id}`" class="block text-sm font-semibold leading-snug truncate hover:text-primary transition-colors">{{ p.title }}</NuxtLink>
                   </div>
                </div>
-               <div class="text-[13px] text-gray-500 truncate">{{ p.category.name }}</div>
+               <div v-if="kind !== 'EVENT'" class="text-[13px] text-gray-500 truncate">{{ p.category.name }}</div>
                <div class="text-[13px] text-gray-500">{{ formatDate(p.createdAt) }}</div>
                <div>
                   <button type="button" :disabled="busyId === p.id"
@@ -124,6 +126,9 @@ const nounCap = computed(() => noun.value.charAt(0).toUpperCase() + noun.value.s
 const searchPlaceholder = computed(() => `Tìm ${noun.value}...`)
 const allCategoriesLabel = computed(() => props.kind === 'NOTICE' ? 'Tất cả loại' : 'Tất cả chuyên mục')
 const firstItemLabel = computed(() => `Tạo ${noun.value} đầu tiên`)
+// Sự kiện không hiển thị cột Chuyên mục
+const gridCols = computed(() =>
+   props.kind === 'EVENT' ? 'grid-cols-[1fr_130px_120px_90px]' : 'grid-cols-[1fr_150px_130px_120px_90px]')
 
 const statusTabs: { label: string; value?: ArticleStatus }[] = [
    { label: 'Tất cả', value: undefined },

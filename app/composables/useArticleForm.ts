@@ -13,6 +13,8 @@ export function useArticleForm() {
     status?: ArticleStatus;
     thumbnailFile?: File | null;
     blocks?: EditorBlock[] | null;
+    // Tòa chuyên trách — chuỗi rỗng để backend xóa/bỏ qua
+    court?: string;
   }): FormData {
     const fd = new FormData();
 
@@ -22,6 +24,7 @@ export function useArticleForm() {
     if (payload.categoryId !== undefined)
       fd.append("categoryId", payload.categoryId);
     if (payload.status !== undefined) fd.append("status", payload.status);
+    if (payload.court !== undefined) fd.append("court", payload.court);
     if (payload.thumbnailFile) fd.append("thumbnail", payload.thumbnailFile);
 
     if (payload.blocks) {

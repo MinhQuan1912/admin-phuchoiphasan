@@ -31,7 +31,10 @@ definePageMeta({
    },
 })
 
-useHead({ title: 'Xem thử bài viết · Quản trị' })
+useHead({
+   // Font Inter + Merriweather do @nuxt/fonts tự nạp (khai báo ở nuxt.config.ts)
+   title: 'Xem thử bài viết · Quản trị',
+})
 
 function readDraft(): ArticlePreviewDraft | null {
    // Tab soạn thảo ghi bản nháp vào localStorage ngay trước khi mở tab này
