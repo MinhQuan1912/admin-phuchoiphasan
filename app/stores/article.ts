@@ -28,25 +28,42 @@ export const useArticleStore = defineStore("article", () => {
 
   let latestListReq = 0;
 
+  const listCache = new Map<string, Paginated<Article>>();
+  const listFromCache = ref(false);
+
+  function applyPage(d: Paginated<Article>) {
+    items.value = d.items;
+    total.value = d.total;
+    page.value = d.page;
+    limit.value = d.limit;
+    totalPages.value = d.totalPages;
+  }
+
   async function fetchList(opts: ArticleListFilters = {}) {
     const api = useApi();
     const reqId = ++latestListReq;
+
+    const query: Record<string, string | number> = {
+      page: opts.page ?? page.value,
+      limit: opts.limit ?? limit.value,
+    };
+    const status = "status" in opts ? opts.status : filters.status;
+    const categoryId =
+      "categoryId" in opts ? opts.categoryId : filters.categoryId;
+    const kind = "kind" in opts ? opts.kind : filters.kind;
+    const q = ("q" in opts ? opts.q ?? "" : filters.q).trim();
+    if (status) query.status = status;
+    if (categoryId) query.categoryId = categoryId;
+    if (kind) query.kind = kind;
+    if (q) query.q = q;
+
+    const cacheKey = JSON.stringify(query);
+    const cached = listCache.get(cacheKey);
+    listFromCache.value = !!cached;
+    if (cached) applyPage(cached);
+
     loading.value = true;
     try {
-      const query: Record<string, string | number> = {
-        page: opts.page ?? page.value,
-        limit: opts.limit ?? limit.value,
-      };
-      const status = "status" in opts ? opts.status : filters.status;
-      const categoryId =
-        "categoryId" in opts ? opts.categoryId : filters.categoryId;
-      const kind = "kind" in opts ? opts.kind : filters.kind;
-      const q = ("q" in opts ? opts.q ?? "" : filters.q).trim();
-      if (status) query.status = status;
-      if (categoryId) query.categoryId = categoryId;
-      if (kind) query.kind = kind;
-      if (q) query.q = q;
-
       const res = await api<ApiResponse<Paginated<Article>>>(
         "/articles/admin/list",
         { query },
@@ -54,11 +71,8 @@ export const useArticleStore = defineStore("article", () => {
       if (reqId !== latestListReq) return;
 
       const d = res.data!;
-      items.value = d.items;
-      total.value = d.total;
-      page.value = d.page;
-      limit.value = d.limit;
-      totalPages.value = d.totalPages;
+      applyPage(d);
+      listCache.set(cacheKey, d);
     } catch (e) {
       if (reqId === latestListReq) throw e;
     } finally {
@@ -71,6 +85,15 @@ export const useArticleStore = defineStore("article", () => {
     const res = await api<ApiResponse<ArticleStats>>("/articles/admin/stats");
     stats.value = res.data ?? null;
     return stats.value;
+  }
+
+  async function countFeaturedPublished() {
+    const api = useApi();
+    const res = await api<ApiResponse<Paginated<Article>>>(
+      "/articles/admin/list",
+      { query: { featured: true, status: "PUBLISHED", page: 1, limit: 1 } },
+    );
+    return res.data?.total ?? 0;
   }
 
   async function fetchOne(id: string) {
@@ -87,18 +110,22 @@ export const useArticleStore = defineStore("article", () => {
 
   async function create(form: FormData) {
     const api = useApi();
-    return await api<ApiResponse<Article>>("/articles", {
+    const res = await api<ApiResponse<Article>>("/articles", {
       method: "POST",
       body: form,
     });
+    listCache.clear();
+    return res;
   }
 
   async function update(id: string, form: FormData) {
     const api = useApi();
-    return await api<ApiResponse<Article>>(`/articles/${id}`, {
+    const res = await api<ApiResponse<Article>>(`/articles/${id}`, {
       method: "PUT",
       body: form,
     });
+    listCache.clear();
+    return res;
   }
 
   async function setStatus(id: string, status: ArticleStatus) {
@@ -120,6 +147,7 @@ export const useArticleStore = defineStore("article", () => {
     const res = await api<ApiResponse<{ id: string }>>(`/articles/${id}`, {
       method: "DELETE",
     });
+    listCache.clear();
     if (items.value.length === 1 && page.value > 1) page.value -= 1;
     return res;
   }
@@ -131,11 +159,13 @@ export const useArticleStore = defineStore("article", () => {
     limit,
     totalPages,
     loading,
+    listFromCache,
     current,
     stats,
     filters,
     fetchList,
     fetchStats,
+    countFeaturedPublished,
     fetchOne,
     create,
     update,

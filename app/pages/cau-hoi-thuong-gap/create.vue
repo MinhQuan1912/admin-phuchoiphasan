@@ -1,12 +1,12 @@
 <template>
    <div>
-      <NuxtLink to="/tin-tuc"
+      <NuxtLink to="/cau-hoi-thuong-gap"
          class="inline-flex items-center gap-1.5 text-[13px] font-semibold text-gray-500 hover:text-primary transition-colors mb-4">
          <IconsChevronLeft class="size-3.75" />
          Quay lại danh sách
       </NuxtLink>
 
-      <ArticleForm default-kind="NEWS" base-path="/tin-tuc" :loading="loading" @submit="onSubmit" />
+      <ArticleForm default-kind="FAQ" base-path="/cau-hoi-thuong-gap" :loading="loading" @submit="onSubmit" />
    </div>
 </template>
 
@@ -17,7 +17,7 @@ import { useArticleStore } from '~/stores/article'
 import type { ArticleFormPayload } from '~/types'
 
 definePageMeta({ middleware: 'auth' })
-useHead({ title: 'Soạn tin tức · Quản trị' })
+useHead({ title: 'Soạn câu hỏi · Quản trị' })
 
 const store = useArticleStore()
 const toast = useToastMessage()
@@ -31,7 +31,7 @@ async function onSubmit(payload: ArticleFormPayload) {
       const fd = buildArticleFormData(payload)
       const res = await store.create(fd)
       toast.success(res.message)
-      await navigateTo('/tin-tuc')
+      await navigateTo('/cau-hoi-thuong-gap')
    } catch (e: any) {
       toast.error(e.message)
    } finally {

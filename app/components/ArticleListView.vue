@@ -21,20 +21,26 @@
             @click="onChangeStatus(s.value)">
             {{ s.label }}
          </button>
-         <!-- Sự kiện dùng 1 chuyên mục cố định ẩn nên không cần lọc -->
-         <USelect v-if="kind !== 'EVENT'" v-model="selectedCategoryId" :items="categoryItems"
+         <!-- Sự kiện / Câu hỏi dùng 1 chuyên mục cố định ẩn nên không cần lọc -->
+         <USelect v-if="showCategory" v-model="selectedCategoryId" :items="categoryItems"
             :placeholder="allCategoriesLabel" size="md" variant="outline"
             class="ml-auto min-w-45 max-w-full rounded-full"
             :ui="{ base: 'rounded-full font-semibold', content: 'rounded-xl' }" />
       </div>
 
       <div class="bg-white border border-gray-200 rounded-[14px] overflow-x-auto">
-         <div class="grid min-w-205 gap-4 items-center px-5 py-3.5 bg-gray-100 uppercase tracking-wide text-[11px] font-bold text-gray-500" :class="gridCols">
-            <div>Tiêu đề</div><div v-if="kind !== 'EVENT'">Chuyên mục</div><div>Ngày</div><div>Trạng thái</div><div class="text-right">Thao tác</div>
+         <div class="grid min-w-230 gap-4 items-center px-5 py-3.5 bg-gray-100 uppercase tracking-wide text-[11px] font-bold text-gray-500" :class="gridCols">
+            <div>Tiêu đề</div><div v-if="showCategory">Chuyên mục</div><div v-else-if="showDocumentCode">Số hiệu</div><div>{{ dateLabel }}</div><div>Lượt xem</div><div>Trạng thái</div><div class="text-right">Thao tác</div>
          </div>
 
-         <div v-if="firstLoad" class="p-5 space-y-3">
-            <div v-for="i in 5" :key="i" class="h-10 rounded-md bg-gray-100 animate-pulse"></div>
+         <!-- Giữ chỗ đúng bằng chiều cao một trang hàng thật để layout không nhảy;
+              chỉ tô xám khi tải lâu, tải nhanh thì không kịp thấy gì -->
+         <div v-if="firstLoad">
+            <div v-for="i in PAGE_SIZE" :key="i"
+               class="flex items-center px-5 py-3.5 border-t border-gray-100">
+               <div class="h-8.5 w-full rounded-md"
+                  :class="showSkeleton ? 'bg-gray-100 animate-pulse' : ''"></div>
+            </div>
          </div>
 
          <div v-else-if="!store.items.length && !store.loading" class="px-5 py-14 text-center">
@@ -45,16 +51,27 @@
          <div v-else :aria-busy="store.loading" class="transition-opacity duration-150"
             :class="store.loading ? 'opacity-60' : 'opacity-100'">
             <div v-for="p in store.items" :key="p.id"
-               class="grid min-w-205 gap-4 items-center px-5 py-3.5 border-t border-gray-100 hover:bg-gray-50/60 transition-colors"
+               class="grid min-w-230 gap-4 items-center px-5 py-3.5 border-t border-gray-100 hover:bg-gray-50/60 transition-colors"
                :class="gridCols">
                <div class="flex items-center gap-3 min-w-0">
-                  <img :src="p.thumbnail" :alt="p.title" class="w-12 h-8.5 shrink-0 rounded-md object-cover bg-gray-100">
-                  <div class="min-w-0">
+                  <!-- Văn bản pháp luật không có ảnh đại diện -->
+                  <img v-if="p.thumbnail" :src="p.thumbnail" :alt="p.title"
+                     class="w-12 h-8.5 shrink-0 rounded-md object-cover bg-gray-100">
+                  <div class="min-w-0 flex items-center gap-1.5">
+                     <span v-if="p.featured" title="Bài nổi bật" class="shrink-0 text-amber-500 leading-none">★</span>
                      <NuxtLink :to="`${basePath}/${p.id}`" class="block text-sm font-semibold leading-snug truncate hover:text-primary transition-colors">{{ p.title }}</NuxtLink>
                   </div>
                </div>
-               <div v-if="kind !== 'EVENT'" class="text-[13px] text-gray-500 truncate">{{ p.category.name }}</div>
-               <div class="text-[13px] text-gray-500">{{ formatDate(p.createdAt) }}</div>
+               <div v-if="showCategory" class="text-[13px] text-gray-500 truncate">{{ p.category.name }}</div>
+               <div v-else-if="showDocumentCode" class="text-[13px] text-gray-500 truncate">{{ p.documentCode || '—' }}
+               </div>
+               <div class="text-[13px] text-gray-500">
+                  {{ formatDate(showDocumentCode ? p.effectiveDate : p.createdAt) }}
+               </div>
+               <div class="flex items-center gap-1.5 text-[13px] text-gray-500" title="Lượt xem trang chi tiết">
+                  <IconsEye class="size-3.75 shrink-0" />
+                  {{ formatNumber(p.views) }}
+               </div>
                <div>
                   <button type="button" :disabled="busyId === p.id"
                      :title="p.status === 'PUBLISHED' ? 'Bấm để chuyển về bản nháp' : 'Bấm để đăng'"
@@ -108,7 +125,7 @@
 import { useToastMessage } from '~/composables/useToastMessage'
 import { useArticleStore } from '~/stores/article'
 import { useCategoryStore } from '~/stores/category'
-import { STATUS_LABEL, type Article, type ArticleStatus, type CategoryKind } from '~/types'
+import { STATUS_LABEL, hasCategoryPicker, sortNoticeTypes, type Article, type ArticleStatus, type CategoryKind } from '~/types'
 
 const props = defineProps<{
    kind: CategoryKind
@@ -126,9 +143,15 @@ const nounCap = computed(() => noun.value.charAt(0).toUpperCase() + noun.value.s
 const searchPlaceholder = computed(() => `Tìm ${noun.value}...`)
 const allCategoriesLabel = computed(() => props.kind === 'NOTICE' ? 'Tất cả loại' : 'Tất cả chuyên mục')
 const firstItemLabel = computed(() => `Tạo ${noun.value} đầu tiên`)
-// Sự kiện không hiển thị cột Chuyên mục
+// Loại dùng chuyên mục cố định (Sự kiện, Câu hỏi, Văn bản) không hiển thị cột Chuyên mục
+const showCategory = computed(() => hasCategoryPicker(props.kind))
+// Văn bản pháp luật thay cột Chuyên mục bằng Số hiệu, và cột ngày là ngày hiệu lực
+const showDocumentCode = computed(() => props.kind === 'LEGAL')
+const dateLabel = computed(() => (showDocumentCode.value ? 'Hiệu lực' : 'Ngày'))
 const gridCols = computed(() =>
-   props.kind === 'EVENT' ? 'grid-cols-[1fr_130px_120px_90px]' : 'grid-cols-[1fr_150px_130px_120px_90px]')
+   showCategory.value || showDocumentCode.value
+      ? 'grid-cols-[1fr_150px_130px_90px_120px_90px]'
+      : 'grid-cols-[1fr_130px_90px_120px_90px]')
 
 const statusTabs: { label: string; value?: ArticleStatus }[] = [
    { label: 'Tất cả', value: undefined },
@@ -144,13 +167,20 @@ const busyId = ref<string | null>(null)
 const pendingDelete = ref<Article | null>(null)
 const deleting = ref(false)
 const firstLoad = ref(true)
+const showSkeleton = useDelayedFlag(firstLoad)
+// Số hàng mỗi trang — khối giữ chỗ vẽ đúng chừng này hàng nên layout không nhảy.
+// Không dùng store.limit vì đó là state dùng chung, trang tổng quan để 5.
+const PAGE_SIZE = 10
 
-const categoryItems = computed(() => [
-   { label: allCategoriesLabel.value, value: undefined },
-   ...categoryStore.items
-      .filter(c => c.kind === props.kind)
-      .map(c => ({ label: c.name, value: c.id as string | undefined })),
-])
+const categoryItems = computed(() => {
+   const list = categoryStore.items.filter(c => c.kind === props.kind)
+   // Thông báo: giữ thứ tự 5 loại nghiệp vụ như ở form soạn thảo
+   const ordered = props.kind === 'NOTICE' ? sortNoticeTypes(list) : list
+   return [
+      { label: allCategoriesLabel.value, value: undefined },
+      ...ordered.map(c => ({ label: c.name, value: c.id as string | undefined })),
+   ]
+})
 
 const isFiltered = computed(
    () => !!activeStatus.value || !!query.value.trim() || !!selectedCategoryId.value,
@@ -164,12 +194,15 @@ function load(page = 1) {
    store.filters.status = activeStatus.value
    store.filters.categoryId = selectedCategoryId.value
    store.filters.q = query.value
-   return store.fetchList({ page, limit: 10 }).catch((e: any) => toast.error(e.message))
+   return store.fetchList({ page, limit: PAGE_SIZE }).catch((e: any) => toast.error(e.message))
 }
 
 onMounted(async () => {
    categoryStore.fetchAll().catch(() => null)
-   await load(1)
+   const pending = load(1)
+   // Store áp dữ liệu đã cache ngay trước await — có sẵn thì hiện luôn, khỏi skeleton
+   firstLoad.value = !store.listFromCache
+   await pending
    firstLoad.value = false
 })
 
@@ -199,7 +232,8 @@ async function onToggleStatus(p: Article) {
    try {
       const res = await store.setStatus(p.id, next)
       toast.success(res.message)
-      if (activeStatus.value) await load(store.page)
+      // Nạp lại luôn: đăng một bài nổi bật có thể khiến backend bỏ nổi bật bài khác
+      await load(store.page)
       await store.fetchStats().catch(() => null)
    } catch (e: any) {
       toast.error(e.message)
@@ -231,7 +265,8 @@ async function confirmDelete() {
    }
 }
 
-function formatDate(d: string) {
+function formatDate(d: string | null) {
+   if (!d) return '—'
    return new Date(d).toLocaleDateString('vi-VN', {
       day: '2-digit', month: '2-digit', year: 'numeric',
    })

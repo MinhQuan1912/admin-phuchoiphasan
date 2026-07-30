@@ -78,7 +78,7 @@
 </template>
 
 <script setup lang="ts">
-import { IconsAnnouncements, IconsDashboard, IconsPosts, IconsTag } from '#components'
+import { IconsAnnouncements, IconsDashboard, IconsLegal, IconsPosts, IconsQuestion, IconsTag } from '#components'
 import { useAuthStore } from '~/stores/auth'
 
 const route = useRoute()
@@ -124,6 +124,8 @@ const menu = [
    { to: '/su-kien', label: 'Sự kiện', icon: IconsPosts },
    { to: '/chuyen-muc', label: 'Chuyên mục', icon: IconsTag },
    { to: '/thong-bao-pha-san', label: 'Thông báo', icon: IconsAnnouncements },
+   { to: '/cau-hoi-thuong-gap', label: 'Câu hỏi thường gặp', icon: IconsQuestion },
+   { to: '/van-ban-phap-luat', label: 'Văn bản pháp luật', icon: IconsLegal },
 ]
 
 function isActive(item: { to: string; exact?: boolean }) {
@@ -143,6 +145,12 @@ const meta = computed(() => {
    if (p === '/thong-bao-pha-san/create') return ['Thêm thông báo', 'Soạn thông báo phá sản']
    if (p.startsWith('/thong-bao-pha-san/')) return ['Sửa thông báo', 'Soạn thông báo phá sản']
    if (p.startsWith('/thong-bao-pha-san')) return ['Thông báo phá sản', 'Quản lý thông báo phá sản']
+   if (p === '/cau-hoi-thuong-gap/create') return ['Soạn câu hỏi', 'Trình soạn thảo nội dung']
+   if (p.startsWith('/cau-hoi-thuong-gap/')) return ['Sửa câu hỏi', 'Trình soạn thảo nội dung']
+   if (p.startsWith('/cau-hoi-thuong-gap')) return ['Câu hỏi thường gặp', 'Quản lý câu hỏi thường gặp']
+   if (p === '/van-ban-phap-luat/create') return ['Soạn văn bản', 'Trình soạn thảo nội dung']
+   if (p.startsWith('/van-ban-phap-luat/')) return ['Sửa văn bản', 'Trình soạn thảo nội dung']
+   if (p.startsWith('/van-ban-phap-luat')) return ['Văn bản pháp luật', 'Quản lý văn bản pháp luật']
    if (p.startsWith('/change-password')) return ['Đổi mật khẩu', 'Cập nhật mật khẩu đăng nhập']
    return ['Quản trị', '']
 })

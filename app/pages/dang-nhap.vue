@@ -1,23 +1,8 @@
 <template>
    <div class="min-h-screen grid lg:grid-cols-2 bg-white font-sans">
-      <div class="relative overflow-hidden hidden lg:block">
-         <div class="absolute inset-0">
-            <img src="https://picsum.photos/300/200" alt="" class="w-full h-full object-cover object-center" />
-         </div>
-         <div class="absolute inset-0 login-overlay"></div>
-         <div class="relative h-full flex flex-col justify-center px-14 text-white">
-            <div class="flex items-center gap-3 mb-7">
-               <div
-                  class="w-11.5 h-11.5 rounded-[11px] bg-white text-primary flex items-center justify-center font-extrabold text-base">
-                  QTV</div>
-               <div class="font-extrabold text-lg">Công ty Hợp danh Quản lý và Thanh lý tài sản VN</div>
-            </div>
-            <h2 class="text-[34px] font-extrabold tracking-tight leading-tight max-w-md mb-3.5">Trang quản trị nội
-               dung</h2>
-            <p class="text-base leading-relaxed text-white/82 max-w-md">
-               Quản lý bài viết, thông báo phá sản và theo dõi hoạt động của cổng thông tin.
-            </p>
-         </div>
+      <div class="relative hidden lg:block">
+         <img src="/images/image.png" alt=""
+            class="absolute inset-0 w-full h-full object-cover object-center" />
       </div>
 
       <div class="flex items-center justify-center p-6 sm:p-10">
@@ -100,10 +85,3 @@ async function onSubmit(_e: FormSubmitEvent<typeof state>) {
    }
 }
 </script>
-
-<style scoped>
-
-.login-overlay {
-   background: linear-gradient(140deg, rgba(3, 7, 18, 0.94), color-mix(in srgb, var(--color-primary, #32c259) 66%, transparent));
-}
-</style>

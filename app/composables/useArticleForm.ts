@@ -1,6 +1,7 @@
 import type {
   ArticleStatus,
   BlockPayload,
+  CategoryKind,
   EditorBlock,
   Article,
 } from "~/types";
@@ -8,23 +9,28 @@ import type {
 export function useArticleForm() {
   function buildArticleFormData(payload: {
     title?: string;
-    description?: string;
     categoryId?: string;
     status?: ArticleStatus;
+    featured?: boolean;
     thumbnailFile?: File | null;
     blocks?: EditorBlock[] | null;
-    // Tòa chuyên trách — chuỗi rỗng để backend xóa/bỏ qua
     court?: string;
+    documentCode?: string;
+    effectiveDate?: string;
   }): FormData {
     const fd = new FormData();
 
     if (payload.title !== undefined) fd.append("title", payload.title);
-    if (payload.description !== undefined)
-      fd.append("description", payload.description);
     if (payload.categoryId !== undefined)
       fd.append("categoryId", payload.categoryId);
     if (payload.status !== undefined) fd.append("status", payload.status);
+    if (payload.featured !== undefined)
+      fd.append("featured", String(payload.featured));
     if (payload.court !== undefined) fd.append("court", payload.court);
+    if (payload.documentCode !== undefined)
+      fd.append("documentCode", payload.documentCode);
+    if (payload.effectiveDate !== undefined)
+      fd.append("effectiveDate", payload.effectiveDate);
     if (payload.thumbnailFile) fd.append("thumbnail", payload.thumbnailFile);
 
     if (payload.blocks) {
@@ -49,17 +55,22 @@ export function useArticleForm() {
   function validateArticle(
     form: {
       title: string;
-      description: string;
       categoryId?: string;
       thumbnailFile?: File | null;
       thumbnailUrl?: string;
       blocks: EditorBlock[];
+      kind?: CategoryKind;
+      documentCode?: string;
+      effectiveDate?: string;
     },
     isEdit = false,
   ): string | null {
     if (!form.title.trim()) return "Vui lòng nhập tiêu đề";
-    if (!form.description.trim()) return "Vui lòng nhập mô tả";
     if (!form.categoryId) return "Vui lòng chọn chuyên mục";
+    if (form.kind === "LEGAL") {
+      if (!form.documentCode?.trim()) return "Vui lòng nhập số hiệu văn bản";
+      if (!form.effectiveDate) return "Vui lòng chọn ngày hiệu lực";
+    }
     if (!isEdit && !form.thumbnailFile) return "Vui lòng chọn ảnh đại diện";
     if (isEdit && !form.thumbnailFile && !form.thumbnailUrl)
       return "Thiếu ảnh đại diện";

@@ -8,7 +8,8 @@
                   <component :is="k.icon" class="size-4.25" />
                </span>
             </div>
-            <div v-if="loading" class="h-9 w-16 mt-2.5 rounded-md bg-gray-100 animate-pulse"></div>
+            <div v-if="loading" class="h-9 w-16 mt-2.5 rounded-md"
+               :class="showSkeleton ? 'bg-gray-100 animate-pulse' : ''"></div>
             <div v-else class="text-3xl font-extrabold tracking-tight mt-2.5">{{ k.value }}</div>
             <div class="text-xs text-gray-500 mt-1">{{ k.hint }}</div>
          </div>
@@ -18,14 +19,14 @@
          <div class="flex items-center justify-between mb-1.5">
             <div class="flex items-center gap-2.5">
                <span class="w-1 h-5 bg-primary rounded-sm"></span>
-               <h3 class="text-base font-extrabold">Tin tức mới nhất</h3>
+               <h3 class="text-base font-extrabold">Bài viết mới nhất</h3>
             </div>
             <NuxtLink to="/tin-tuc" class="text-[13px] font-semibold text-primary">Xem tất cả →</NuxtLink>
          </div>
 
          <div v-if="loading" class="py-3.5">
             <div v-for="i in 5" :key="i" class="h-14 border-t border-gray-100 first:border-t-0 flex items-center">
-               <div class="h-10 w-full rounded-md bg-gray-100 animate-pulse"></div>
+               <div class="h-10 w-full rounded-md" :class="showSkeleton ? 'bg-gray-100 animate-pulse' : ''"></div>
             </div>
          </div>
 
@@ -50,7 +51,7 @@
 </template>
 
 <script setup lang="ts">
-import { IconsAnnouncements, IconsCheck, IconsEdit, IconsPosts } from '#components'
+import { IconsAnnouncements, IconsCheck, IconsEye, IconsPosts } from '#components'
 import { useToastMessage } from '~/composables/useToastMessage'
 import { useArticleStore } from '~/stores/article'
 import { STATUS_LABEL, type ArticleStatus } from '~/types'
@@ -61,20 +62,23 @@ useHead({ title: 'Tổng quan · Quản trị' })
 const store = useArticleStore()
 const toast = useToastMessage()
 const loading = ref(true)
+const showSkeleton = useDelayedFlag(loading)
 
 const kpis = computed(() => [
-   { label: 'Tổng tin tức', value: store.stats?.total ?? 0, hint: 'Toàn bộ tin tức', icon: IconsPosts },
-   { label: 'Đã đăng', value: store.stats?.published ?? 0, hint: 'Đang hiển thị trên website', icon: IconsCheck },
-   { label: 'Bản nháp', value: store.stats?.draft ?? 0, hint: 'Chưa hiển thị công khai', icon: IconsEdit },
-   { label: 'Thông báo', value: store.stats?.notices ?? 0, hint: 'Số thông báo đang có', icon: IconsAnnouncements },
+   { label: 'Tổng tin tức', value: formatNumber(store.stats?.total ?? 0), hint: 'Toàn bộ tin tức', icon: IconsPosts },
+   { label: 'Đã đăng', value: formatNumber(store.stats?.published ?? 0), hint: 'Đang hiển thị trên website', icon: IconsCheck },
+   { label: 'Tổng lượt xem', value: formatNumber(store.stats?.views ?? 0), hint: 'Toàn bộ bài viết trên website', icon: IconsEye },
+   { label: 'Thông báo', value: formatNumber(store.stats?.notices ?? 0), hint: 'Số thông báo đang có', icon: IconsAnnouncements },
 ])
 
 onMounted(async () => {
    try {
-      await Promise.all([
+      const pending = Promise.all([
          store.fetchStats(),
          store.fetchList({ page: 1, limit: 5, status: undefined, q: '' }),
       ])
+      loading.value = !store.stats || !store.listFromCache
+      await pending
    } catch (e: any) {
       toast.error(e.message)
    } finally {

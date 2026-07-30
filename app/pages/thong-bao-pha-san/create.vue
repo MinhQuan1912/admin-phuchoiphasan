@@ -14,7 +14,7 @@
 import { useArticleForm } from '~/composables/useArticleForm'
 import { useToastMessage } from '~/composables/useToastMessage'
 import { useArticleStore } from '~/stores/article'
-import type { ArticleStatus, EditorBlock } from '~/types'
+import type { ArticleFormPayload } from '~/types'
 
 definePageMeta({ middleware: 'auth' })
 useHead({ title: 'Soạn thông báo · Quản trị' })
@@ -25,15 +25,7 @@ const { buildArticleFormData } = useArticleForm()
 
 const loading = ref(false)
 
-async function onSubmit(payload: {
-   title: string
-   description: string
-   categoryId: string
-   status: ArticleStatus
-   thumbnailFile: File | null
-   blocks: EditorBlock[]
-   court: string
-}) {
+async function onSubmit(payload: ArticleFormPayload) {
    loading.value = true
    try {
       const fd = buildArticleFormData(payload)

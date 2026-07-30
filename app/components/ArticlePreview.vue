@@ -20,8 +20,6 @@
 
          <div class="flex items-center gap-3.5 pb-6 border-b border-gray-200 text-[15px] text-gray-500">
             <span>{{ today }}</span>
-            <span class="opacity-60">·</span>
-            <span>{{ readingTime }} phút đọc</span>
          </div>
 
          <div v-if="!renderable.length" class="py-10 text-center text-sm text-gray-500">
@@ -61,17 +59,6 @@ const today = computed(() =>
    new Date().toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }),
 )
 
-const readingTime = computed(() => {
-   const words = props.blocks
-      .filter(b => b.type === 'TEXT')
-      .map(b => b.content.replace(/<[^>]+>/g, ' '))
-      .join(' ')
-      .trim()
-      .split(/\s+/)
-      .filter(Boolean).length
-   return Math.max(1, Math.round(words / 200))
-})
-
 // Thanh tiến độ đọc bài, giống trang chi tiết bên frontend
 const progress = ref(0)
 
@@ -89,115 +76,14 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
 </script>
 
 <style scoped>
-/* Mô phỏng giao diện frontend: màu primary + font chữ (body Inter, heading Merriweather) */
+/* Chỉ giữ phần khung trang xem thử. Style thân bài (`.article-body`) nằm ở
+   app/assets/css/article-body.css — file dùng chung với Frontend. */
 .frontend-surface {
-   --color-preview-primary: #32c259;
+   --color-preview-primary: var(--color-primary);
    font-family: 'Inter', Arial, Helvetica, sans-serif;
 }
 
-.frontend-surface h1,
-.article-body :deep(h2),
-.article-body :deep(h3) {
+.frontend-surface h1 {
    font-family: 'Merriweather', Georgia, serif;
-}
-
-.article-body {
-   margin-bottom: 1.75rem;
-}
-
-.article-body :deep(p) {
-   margin-bottom: 1.25rem;
-   font-size: 18.5px;
-   line-height: 2rem;
-   color: var(--color-gray-500);
-}
-
-.article-body :deep(h2) {
-   margin: 2.25rem 0 0.875rem;
-   font-size: 1.5rem;
-   font-weight: 800;
-   letter-spacing: -0.025em;
-   line-height: 1.3;
-}
-
-.article-body :deep(h3) {
-   margin: 1.75rem 0 0.75rem;
-   font-size: 1.25rem;
-   font-weight: 700;
-   letter-spacing: -0.02em;
-   line-height: 1.35;
-}
-
-.article-body :deep(ul),
-.article-body :deep(ol) {
-   margin-bottom: 1.5rem;
-   padding-left: 1.5rem;
-   font-size: 18.5px;
-   line-height: 2;
-   color: var(--color-gray-500);
-}
-
-.article-body :deep(ul) {
-   list-style: disc;
-}
-
-.article-body :deep(ol) {
-   list-style: decimal;
-}
-
-.article-body :deep(li) {
-   margin-bottom: 0.75rem;
-}
-
-.article-body :deep(li > p) {
-   margin-bottom: 0;
-}
-
-.article-body :deep(strong) {
-   color: var(--color-gray-900);
-   font-weight: 700;
-}
-
-.article-body :deep(blockquote) {
-   margin: 1.75rem 0;
-   padding: 1.25rem 1.5rem;
-   border-left: 4px solid var(--color-preview-primary);
-   background: var(--color-gray-100);
-   border-radius: 0 0.75rem 0.75rem 0;
-   font-size: 19px;
-   line-height: 1.625;
-   font-style: italic;
-}
-
-.article-body :deep(blockquote p) {
-   margin-bottom: 0;
-   font-size: inherit;
-   line-height: inherit;
-   color: inherit;
-}
-
-.article-body :deep(a) {
-   color: var(--color-preview-primary);
-   text-decoration: underline;
-}
-
-.article-body :deep(mark) {
-   padding: 0.05em 0.2em;
-   border-radius: 0.25em;
-   color: inherit;
-}
-
-.article-body :deep(sub),
-.article-body :deep(sup) {
-   line-height: 0;
-   font-size: 0.75em;
-}
-
-.article-body :deep([style*="text-align"]) {
-   display: block;
-}
-
-.article-body :deep(> :last-child) {
-   margin-bottom: 0;
 }
 </style>

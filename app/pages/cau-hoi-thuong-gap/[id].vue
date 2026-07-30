@@ -1,6 +1,6 @@
 <template>
    <div>
-      <NuxtLink to="/tin-tuc"
+      <NuxtLink to="/cau-hoi-thuong-gap"
          class="inline-flex items-center gap-1.5 text-[13px] font-semibold text-gray-500 hover:text-primary transition-colors mb-4">
          <IconsChevronLeft class="size-3.75" />
          Quay lại danh sách
@@ -11,7 +11,7 @@
          <div class="h-80 rounded-[14px] bg-gray-100 animate-pulse"></div>
       </div>
 
-      <ArticleForm v-else is-edit base-path="/tin-tuc" :loading="loading" :initial-title="article.title"
+      <ArticleForm v-else is-edit base-path="/cau-hoi-thuong-gap" :loading="loading" :initial-title="article.title"
          :initial-thumbnail-url="article.thumbnail"
          :initial-category-id="article.categoryId" :initial-kind="article.category.kind"
          :initial-status="article.status" :initial-featured="article.featured" :initial-blocks="initialBlocks"
@@ -26,7 +26,7 @@ import { useArticleStore } from '~/stores/article'
 import type { Article, ArticleFormPayload, EditorBlock } from '~/types'
 
 definePageMeta({ middleware: 'auth' })
-useHead({ title: 'Sửa tin tức · Quản trị' })
+useHead({ title: 'Sửa câu hỏi · Quản trị' })
 
 const route = useRoute()
 const store = useArticleStore()
@@ -47,7 +47,7 @@ onMounted(async () => {
       }
    } catch (e: any) {
       toast.error(e.message)
-      await navigateTo('/tin-tuc')
+      await navigateTo('/cau-hoi-thuong-gap')
    }
 })
 
@@ -57,7 +57,7 @@ async function onSubmit(payload: ArticleFormPayload) {
       const fd = buildArticleFormData(payload)
       const res = await store.update(id, fd)
       toast.success(res.message)
-      await navigateTo('/tin-tuc')
+      await navigateTo('/cau-hoi-thuong-gap')
    } catch (e: any) {
       toast.error(e.message)
    } finally {

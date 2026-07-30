@@ -231,6 +231,9 @@ watch(model, (v) => {
 <style scoped>
 
 :deep(.tiptap-content) {
+   /* Khớp độ đậm của thân bài ngoài website (ArticleBlocks) */
+   font-weight: 500;
+
    h2 {
       font-size: 1.25rem;
       font-weight: 800;

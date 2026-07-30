@@ -12,9 +12,9 @@
       </div>
 
       <ArticleForm v-else is-edit base-path="/thong-bao-pha-san" :loading="loading" :initial-title="article.title"
-         :initial-description="article.description" :initial-thumbnail-url="article.thumbnail"
+         :initial-thumbnail-url="article.thumbnail"
          :initial-category-id="article.categoryId" :initial-kind="article.category.kind"
-         :initial-status="article.status" :initial-blocks="initialBlocks" :initial-court="article.court ?? ''"
+         :initial-status="article.status" :initial-featured="article.featured" :initial-blocks="initialBlocks" :initial-court="article.court ?? ''"
          @submit="onSubmit" />
    </div>
 </template>
@@ -23,7 +23,7 @@
 import { useArticleForm } from '~/composables/useArticleForm'
 import { useToastMessage } from '~/composables/useToastMessage'
 import { useArticleStore } from '~/stores/article'
-import type { Article, ArticleStatus, EditorBlock } from '~/types'
+import type { Article, ArticleFormPayload, EditorBlock } from '~/types'
 
 definePageMeta({ middleware: 'auth' })
 useHead({ title: 'Sửa thông báo · Quản trị' })
@@ -51,15 +51,7 @@ onMounted(async () => {
    }
 })
 
-async function onSubmit(payload: {
-   title: string
-   description: string
-   categoryId: string
-   status: ArticleStatus
-   thumbnailFile: File | null
-   blocks: EditorBlock[]
-   court: string
-}) {
+async function onSubmit(payload: ArticleFormPayload) {
    loading.value = true
    try {
       const fd = buildArticleFormData(payload)
