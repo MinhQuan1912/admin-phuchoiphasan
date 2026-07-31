@@ -65,10 +65,10 @@ const loading = ref(true)
 const showSkeleton = useDelayedFlag(loading)
 
 const kpis = computed(() => [
-   { label: 'Tổng tin tức', value: formatNumber(store.stats?.total ?? 0), hint: 'Toàn bộ tin tức', icon: IconsPosts },
-   { label: 'Đã đăng', value: formatNumber(store.stats?.published ?? 0), hint: 'Đang hiển thị trên website', icon: IconsCheck },
-   { label: 'Tổng lượt xem', value: formatNumber(store.stats?.views ?? 0), hint: 'Toàn bộ bài viết trên website', icon: IconsEye },
-   { label: 'Thông báo', value: formatNumber(store.stats?.notices ?? 0), hint: 'Số thông báo đang có', icon: IconsAnnouncements },
+   { label: 'Tổng tin tức', value: formatNumber(store.stats?.total ?? 0), hint: 'Gồm cả bản nháp', icon: IconsPosts },
+   { label: 'Tin tức đã đăng', value: formatNumber(store.stats?.published ?? 0), hint: 'Tin tức đang hiển thị trên website', icon: IconsCheck },
+   { label: 'Tổng lượt xem', value: formatNumber(store.stats?.views ?? 0), hint: 'Mọi loại nội dung', icon: IconsEye },
+   { label: 'Thông báo', value: formatNumber(store.stats?.notices ?? 0), hint: 'Gồm cả bản nháp', icon: IconsAnnouncements },
 ])
 
 onMounted(async () => {
