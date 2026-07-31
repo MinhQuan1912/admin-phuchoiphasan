@@ -21,7 +21,6 @@
             @click="onChangeStatus(s.value)">
             {{ s.label }}
          </button>
-         <!-- Sự kiện / Câu hỏi dùng 1 chuyên mục cố định ẩn nên không cần lọc -->
          <USelect v-if="showCategory" v-model="selectedCategoryId" :items="categoryItems"
             :placeholder="allCategoriesLabel" size="md" variant="outline"
             class="ml-auto min-w-45 max-w-full rounded-full"
@@ -33,8 +32,6 @@
             <div>Tiêu đề</div><div v-if="showCategory">Chuyên mục</div><div v-else-if="showDocumentCode">Số hiệu</div><div>{{ dateLabel }}</div><div>Lượt xem</div><div>Trạng thái</div><div class="text-right">Thao tác</div>
          </div>
 
-         <!-- Giữ chỗ đúng bằng chiều cao một trang hàng thật để layout không nhảy;
-              chỉ tô xám khi tải lâu, tải nhanh thì không kịp thấy gì -->
          <div v-if="firstLoad">
             <div v-for="i in PAGE_SIZE" :key="i"
                class="flex items-center px-5 py-3.5 border-t border-gray-100">
@@ -48,13 +45,12 @@
             <NuxtLink v-if="!isFiltered" :to="`${basePath}/create`" class="inline-block mt-2 text-sm font-semibold text-primary">{{ firstItemLabel }}</NuxtLink>
          </div>
 
-         <div v-else :aria-busy="store.loading" class="transition-opacity duration-150"
-            :class="store.loading ? 'opacity-60' : 'opacity-100'">
+         <div v-else :aria-busy="store.loading"
+            :class="showLoading ? 'opacity-60 transition-opacity duration-150' : 'opacity-100'">
             <div v-for="p in store.items" :key="p.id"
                class="grid min-w-230 gap-4 items-center px-5 py-3.5 border-t border-gray-100 hover:bg-gray-50/60 transition-colors"
                :class="gridCols">
                <div class="flex items-center gap-3 min-w-0">
-                  <!-- Văn bản pháp luật không có ảnh đại diện -->
                   <img v-if="p.thumbnail" :src="p.thumbnail" :alt="p.title"
                      class="w-12 h-8.5 shrink-0 rounded-md object-cover bg-gray-100">
                   <div class="min-w-0 flex items-center gap-1.5">
@@ -92,16 +88,9 @@
          </div>
       </div>
 
-      <div v-if="!firstLoad && store.items.length" class="flex items-center justify-between mt-4">
-         <div v-if="store.totalPages > 1" class="flex gap-2">
-            <button type="button" class="w-9 h-9 flex items-center justify-center border border-gray-200 rounded-lg disabled:text-gray-400 hover:bg-gray-200 disabled:hover:bg-transparent transition-colors"
-               :disabled="store.page <= 1" @click="goPage(store.page - 1)">‹</button>
-            <button v-for="n in store.totalPages" :key="n" type="button" class="w-9 h-9 flex items-center justify-center rounded-lg text-sm"
-               :class="n === store.page ? 'bg-primary text-white font-semibold' : 'border border-gray-200 hover:bg-gray-200 transition-colors'"
-               @click="goPage(n)">{{ n }}</button>
-            <button type="button" class="w-9 h-9 flex items-center justify-center border border-gray-200 rounded-lg text-sm disabled:text-gray-400 hover:bg-gray-200 disabled:hover:bg-transparent transition-colors"
-               :disabled="store.page >= store.totalPages" @click="goPage(store.page + 1)">›</button>
-         </div>
+      <div v-if="!firstLoad && store.items.length && store.totalPages > 1" class="flex justify-center mt-4">
+         <UPagination :page="store.page" :total="store.total" :items-per-page="PAGE_SIZE"
+            @update:page="goPage" />
       </div>
 
       <div v-if="pendingDelete" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" @click.self="pendingDelete = null">
@@ -143,9 +132,7 @@ const nounCap = computed(() => noun.value.charAt(0).toUpperCase() + noun.value.s
 const searchPlaceholder = computed(() => `Tìm ${noun.value}...`)
 const allCategoriesLabel = computed(() => props.kind === 'NOTICE' ? 'Tất cả loại' : 'Tất cả chuyên mục')
 const firstItemLabel = computed(() => `Tạo ${noun.value} đầu tiên`)
-// Loại dùng chuyên mục cố định (Sự kiện, Câu hỏi, Văn bản) không hiển thị cột Chuyên mục
 const showCategory = computed(() => hasCategoryPicker(props.kind))
-// Văn bản pháp luật thay cột Chuyên mục bằng Số hiệu, và cột ngày là ngày hiệu lực
 const showDocumentCode = computed(() => props.kind === 'LEGAL')
 const dateLabel = computed(() => (showDocumentCode.value ? 'Hiệu lực' : 'Ngày'))
 const gridCols = computed(() =>
@@ -160,6 +147,7 @@ const statusTabs: { label: string; value?: ArticleStatus }[] = [
 ]
 
 const route = useRoute()
+const router = useRouter()
 const activeStatus = ref<ArticleStatus | undefined>(undefined)
 const query = ref('')
 const selectedCategoryId = ref<string | undefined>((route.query.categoryId as string) || undefined)
@@ -168,13 +156,12 @@ const pendingDelete = ref<Article | null>(null)
 const deleting = ref(false)
 const firstLoad = ref(true)
 const showSkeleton = useDelayedFlag(firstLoad)
-// Số hàng mỗi trang — khối giữ chỗ vẽ đúng chừng này hàng nên layout không nhảy.
-// Không dùng store.limit vì đó là state dùng chung, trang tổng quan để 5.
+
+const showLoading = useDelayedFlag(computed(() => store.loading && !store.listFromCache), 250)
 const PAGE_SIZE = 10
 
 const categoryItems = computed(() => {
    const list = categoryStore.items.filter(c => c.kind === props.kind)
-   // Thông báo: giữ thứ tự 5 loại nghiệp vụ như ở form soạn thảo
    const ordered = props.kind === 'NOTICE' ? sortNoticeTypes(list) : list
    return [
       { label: allCategoriesLabel.value, value: undefined },
@@ -189,18 +176,31 @@ const emptyMessage = computed(() =>
    isFiltered.value ? `Không tìm thấy ${noun.value} nào khớp bộ lọc.` : `Chưa có ${noun.value} nào.`,
 )
 
+function pageFromQuery() {
+   const value = Number(route.query.page)
+   return Number.isInteger(value) && value > 0 ? value : 1
+}
+
+function syncPageQuery(page: number) {
+   if (page === pageFromQuery()) return
+   const query = { ...route.query }
+   if (page > 1) query.page = String(page)
+   else delete query.page
+   void router.replace({ query })
+}
+
 function load(page = 1) {
    store.filters.kind = props.kind
    store.filters.status = activeStatus.value
    store.filters.categoryId = selectedCategoryId.value
    store.filters.q = query.value
+   syncPageQuery(page)
    return store.fetchList({ page, limit: PAGE_SIZE }).catch((e: any) => toast.error(e.message))
 }
 
 onMounted(async () => {
    categoryStore.fetchAll().catch(() => null)
-   const pending = load(1)
-   // Store áp dữ liệu đã cache ngay trước await — có sẵn thì hiện luôn, khỏi skeleton
+   const pending = load(pageFromQuery())
    firstLoad.value = !store.listFromCache
    await pending
    firstLoad.value = false
@@ -224,6 +224,7 @@ function onChangeStatus(s?: ArticleStatus) {
 function goPage(n: number) {
    if (n < 1 || n > store.totalPages || n === store.page) return
    load(n)
+   window.scrollTo({ top: 0 })
 }
 
 async function onToggleStatus(p: Article) {
@@ -232,7 +233,6 @@ async function onToggleStatus(p: Article) {
    try {
       const res = await store.setStatus(p.id, next)
       toast.success(res.message)
-      // Nạp lại luôn: đăng một bài nổi bật có thể khiến backend bỏ nổi bật bài khác
       await load(store.page)
       await store.fetchStats().catch(() => null)
    } catch (e: any) {

@@ -29,6 +29,18 @@
          <div v-else class="mt-7">
             <template v-for="b in renderable" :key="b.key">
                <div v-if="b.type === 'TEXT'" class="article-body" v-html="b.content"></div>
+               <figure v-else-if="b.type === 'FILE'"
+                  class="my-7 overflow-hidden rounded-2xl border border-gray-200">
+                  <iframe :src="b.content" :title="b.caption || 'Tệp đính kèm'" loading="lazy"
+                     class="hidden sm:block w-full h-[88vh] min-h-175 border-0 bg-gray-100"></iframe>
+
+                  <a :href="b.content" target="_blank" rel="noopener"
+                     class="sm:hidden flex items-center justify-center gap-2 h-12 bg-white text-[15px] font-bold text-primary">
+                     <IconsFile class="size-4.5" />
+                     Mở ở tab mới
+                  </a>
+               </figure>
+
                <figure v-else class="my-7">
                   <div class="aspect-video rounded-2xl overflow-hidden">
                      <img :src="b.content" :alt="b.caption || ''" class="w-full h-full object-cover">
@@ -59,7 +71,6 @@ const today = computed(() =>
    new Date().toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }),
 )
 
-// Thanh tiến độ đọc bài, giống trang chi tiết bên frontend
 const progress = ref(0)
 
 function onScroll() {
@@ -76,8 +87,6 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
 </script>
 
 <style scoped>
-/* Chỉ giữ phần khung trang xem thử. Style thân bài (`.article-body`) nằm ở
-   app/assets/css/article-body.css — file dùng chung với Frontend. */
 .frontend-surface {
    --color-preview-primary: var(--color-primary);
    font-family: 'Inter', Arial, Helvetica, sans-serif;

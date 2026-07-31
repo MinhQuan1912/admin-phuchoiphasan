@@ -1,6 +1,7 @@
 <template>
-   <div class="grid lg:grid-cols-[1fr_320px] gap-4.5 items-start">
-      <div class="bg-white border border-gray-200 rounded-[14px] p-6">
+   <!-- minmax(0,…) + min-w-0: không có thì bảng rộng trong editor sẽ kéo giãn cả cột nội dung -->
+   <div class="grid lg:grid-cols-[minmax(0,1fr)_320px] gap-4.5 items-start">
+      <div class="min-w-0 bg-white border border-gray-200 rounded-[14px] p-6">
          <label class="block text-[13px] font-semibold mb-1.5">Tiêu đề bài viết</label>
          <input v-model="title" placeholder="Nhập tiêu đề..."
             class="w-full h-12 border border-gray-200 rounded-[10px] px-3.5 text-base font-semibold outline-none focus:border-primary transition-colors mb-4.5" />
@@ -31,10 +32,8 @@
             </p>
          </div>
 
-         <!-- Loại nội dung do trang quyết định (prop defaultKind/initialKind), không cho chọn ở form -->
          <div v-if="showClassifyCard" class="bg-white border border-gray-200 rounded-[14px] p-5">
             <h3 class="text-[15px] font-extrabold mb-3.5">Phân loại</h3>
-            <!-- Sự kiện / Câu hỏi không chọn chuyên mục — dùng chuyên mục cố định ẩn, tự gán -->
             <template v-if="showCategoryPicker">
                <label class="block text-[13px] font-semibold mb-1.5">Chuyên mục</label>
                <USelect v-model="categoryId" :items="categoryItems" :disabled="!kindCategories.length"
@@ -42,14 +41,12 @@
                   class="w-full" :ui="{ base: 'rounded-[10px] h-10.5' }" />
             </template>
 
-            <!-- Tòa chuyên trách — chỉ dùng cho thông báo phá sản -->
             <template v-if="kind === 'NOTICE'">
                <label class="block text-[13px] font-semibold mt-3.5 mb-1.5">Tòa chuyên trách</label>
                <USelect v-model="court" :items="courtItems" placeholder="Chọn tòa chuyên trách" size="lg"
                   variant="outline" class="w-full" :ui="{ base: 'rounded-[10px] h-10.5' }" />
             </template>
 
-            <!-- Số hiệu + ngày hiệu lực — chỉ dùng cho văn bản pháp luật -->
             <template v-if="kind === 'LEGAL'">
                <label class="block text-[13px] font-semibold mb-1.5">Số hiệu văn bản</label>
                <input v-model="documentCode" placeholder="VD: NĐ 22/2015/NĐ-CP"
@@ -76,8 +73,6 @@
                {{ status === 'PUBLISHED' ? 'Bài viết hiển thị trên website.' : 'Bản nháp chỉ mình bạn thấy.' }}
             </p>
 
-            <!-- Chỉ Tin tức mới có bài nổi bật — khối "Tin nổi bật" ngoài website
-                 chỉ lấy từ loại này -->
             <template v-if="showFeatured">
                <label class="flex items-start gap-2.5 mb-2.5 cursor-pointer">
                   <input v-model="featured" type="checkbox"
@@ -141,7 +136,6 @@ const props = defineProps<{
    initialBlocks?: EditorBlock[]
    initialCourt?: Court | ''
    initialDocumentCode?: string
-   // Chuỗi ISO yyyy-mm-dd để đổ thẳng vào <input type="date">
    initialEffectiveDate?: string
 }>()
 
@@ -162,18 +156,13 @@ const categoryId = ref(props.initialCategoryId ?? '')
 const kind = ref<CategoryKind>(props.initialKind ?? props.defaultKind ?? 'NEWS')
 const status = ref<ArticleStatus>(props.initialStatus ?? 'DRAFT')
 const featured = ref(props.initialFeatured ?? false)
-// Bài nổi bật chỉ dành cho Tin tức — các loại khác ẩn hẳn ô chọn và luôn gửi false
 const showFeatured = computed(() => kind.value === 'NEWS')
-// Số bài nổi bật đang đăng, để cảnh báo trước khi backend tự bỏ bài cũ nhất
 const featuredCount = ref(0)
-// Bài đang sửa mà vốn đã nổi bật thì không làm tăng thêm số lượng
 const willReplace = computed(
    () => featuredCount.value + (props.initialFeatured ? 0 : 1) > MAX_FEATURED,
 )
-// Tòa chuyên trách — chỉ áp dụng cho thông báo phá sản (kind = NOTICE)
 const court = ref<Court | undefined>(props.initialCourt || undefined)
 const courtItems = (Object.keys(COURT_LABEL) as Court[]).map(v => ({ label: COURT_LABEL[v], value: v }))
-// Số hiệu + ngày hiệu lực — chỉ áp dụng cho văn bản pháp luật (kind = LEGAL)
 const documentCode = ref(props.initialDocumentCode ?? '')
 const effectiveDate = ref(props.initialEffectiveDate ?? '')
 const thumbnailFile = ref<File | null>(null)
@@ -181,17 +170,14 @@ const thumbnailPreview = ref<string>('')
 const blocks = ref<EditorBlock[]>(props.initialBlocks ? [...props.initialBlocks] : [])
 
 const categories = computed(() => categoryStore.items)
-// Chuyên mục lọc theo loại đang chọn — Tin tức hoặc Thông báo
 const kindCategories = computed(() => {
    const list = categories.value.filter(c => c.kind === kind.value)
-   // Thông báo: hiện đúng thứ tự 5 loại nghiệp vụ, không theo thứ tự API trả về
    return kind.value === 'NOTICE' ? sortNoticeTypes(list) : list
 })
 const showCategoryPicker = computed(() => hasCategoryPicker(kind.value))
 const categoryItems = computed(() => kindCategories.value.map(c => ({ label: c.name, value: c.id })))
 const selectedCategory = computed(() => categories.value.find(c => c.id === categoryId.value))
 
-// Sự kiện / Câu hỏi không có trường riêng nào nên ẩn hẳn thẻ "Phân loại" cho đỡ trống
 const showClassifyCard = computed(() => showCategoryPicker.value || kind.value === 'LEGAL')
 
 const statusOptions: { value: ArticleStatus; label: string; icon: Component }[] = [
@@ -199,9 +185,6 @@ const statusOptions: { value: ArticleStatus; label: string; icon: Component }[] 
    { value: 'PUBLISHED', label: 'Đăng', icon: IconsCheck },
 ]
 
-// Đảm bảo chuyên mục đang chọn thuộc đúng loại; nếu không, lấy mục đầu của loại.
-// Chưa tải xong danh sách chuyên mục thì bỏ qua, tránh xóa mất chuyên mục của
-// bài đang sửa.
 function syncCategoryToKind() {
    if (!categories.value.length) return
    if (!kindCategories.value.some(c => c.id === categoryId.value)) {
@@ -209,7 +192,6 @@ function syncCategoryToKind() {
    }
 }
 
-// Đổi loại thì chuyên mục phải theo loại mới
 watch(kind, syncCategoryToKind)
 
 watch(() => props.initialTitle, v => v !== undefined && (title.value = v))
@@ -275,13 +257,10 @@ function onSubmit() {
       title: title.value,
       categoryId: categoryId.value,
       status: status.value,
-      // Loại khác Tin tức không có khái niệm nổi bật
       featured: showFeatured.value && featured.value,
       thumbnailFile: thumbnailFile.value,
       blocks: blocks.value,
-      // Tin tức không có tòa chuyên trách — gửi rỗng để backend lưu null
       court: kind.value === 'NOTICE' ? (court.value ?? '') : '',
-      // Tương tự: chỉ văn bản pháp luật mới có số hiệu / ngày hiệu lực
       documentCode: kind.value === 'LEGAL' ? documentCode.value.trim() : '',
       effectiveDate: kind.value === 'LEGAL' ? effectiveDate.value : '',
    })

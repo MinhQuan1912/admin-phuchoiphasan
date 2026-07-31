@@ -1,12 +1,11 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
-/* Giữ đồng bộ với Frontend/app/assets/css/article-body.css */
 @import "./article-body.css";
 
 @theme static {
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
-  /* Đồng bộ tông màu với Frontend (Frontend/app/assets/theme/color.css) */
-  --color-primary: #32c259;
+
+  --color-primary: #22c55e;
 }
 
 textarea {

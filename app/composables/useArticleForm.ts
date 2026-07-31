@@ -1,9 +1,11 @@
-import type {
-  ArticleStatus,
-  BlockPayload,
-  CategoryKind,
-  EditorBlock,
-  Article,
+import {
+  FILE_ACCEPT,
+  MAX_FILE_BYTES,
+  type ArticleStatus,
+  type BlockPayload,
+  type CategoryKind,
+  type EditorBlock,
+  type Article,
 } from "~/types";
 
 export function useArticleForm() {
@@ -35,11 +37,21 @@ export function useArticleForm() {
 
     if (payload.blocks) {
       let imageIndex = 0;
+      let fileIndex = 0;
       const json: BlockPayload[] = payload.blocks.map((b) => {
         if (b.type === "TEXT") {
           return { type: "TEXT", content: b.content || "" };
         }
         const caption = b.caption?.trim() || undefined;
+
+        if (b.type === "FILE") {
+          if (!b.file && b.content?.startsWith("http")) {
+            return { type: "FILE", fileIndex: -1, content: b.content, caption };
+          }
+          fd.append("contentFiles", b.file as File);
+          return { type: "FILE", fileIndex: fileIndex++, caption };
+        }
+
         if (!b.file && b.content?.startsWith("http")) {
           return { type: "IMAGE", imageIndex: -1, content: b.content, caption };
         }
@@ -81,6 +93,14 @@ export function useArticleForm() {
         return `Khối #${i + 1}: nội dung văn bản đang trống`;
       if (b.type === "IMAGE" && !b.file && !b.content?.startsWith("http")) {
         return `Khối #${i + 1}: chưa chọn ảnh`;
+      }
+      if (b.type === "FILE") {
+        if (!b.file && !b.content?.startsWith("http"))
+          return `Khối #${i + 1}: chưa chọn tệp PDF`;
+        if (b.file && b.file.type !== FILE_ACCEPT)
+          return `Khối #${i + 1}: chỉ nhận tệp PDF`;
+        if (b.file && b.file.size > MAX_FILE_BYTES)
+          return `Khối #${i + 1}: tệp vượt quá ${MAX_FILE_BYTES / 1024 / 1024}MB`;
       }
     }
     return null;

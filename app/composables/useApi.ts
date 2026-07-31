@@ -1,6 +1,5 @@
 import type { FetchOptions } from "ofetch";
 
-
 const GUEST_PATHS = ["/dang-nhap"];
 
 export function useApi() {

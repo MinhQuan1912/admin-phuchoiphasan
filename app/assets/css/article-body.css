@@ -1,21 +1,3 @@
-/* =============================================================================
- * Style thân bài viết (HTML do TipTap sinh ra).
- *
- * ⚠️ FILE NÀY PHẢI GIỐNG HỆT `Admin/app/assets/css/article-body.css`.
- * Website (`Frontend/app/components/ArticleBlocks.vue`) và trang xem thử của
- * Admin (`Admin/app/components/ArticlePreview.vue`) cùng dùng class
- * `.article-body`, nên sửa một bên thì phải chép sang bên kia — hai project là
- * hai pnpm workspace riêng, không import chéo được.
- *
- * Kiểm tra nhanh hai file có lệch nhau không:
- *   diff Frontend/app/assets/css/article-body.css Admin/app/assets/css/article-body.css
- *
- * Biến dùng ở đây (`--color-primary`, `--color-gray-*`) phải tồn tại ở cả hai
- * app; Admin khai `--color-primary` trong `app/assets/css/main.css`.
- * Quy tắc `.dark` không có tác dụng ở Admin (Admin không có dark mode) nhưng
- * vẫn giữ để hai file trùng nhau tuyệt đối.
- * ========================================================================== */
-
 .article-body {
    margin-bottom: 1.75rem;
 }
@@ -135,12 +117,59 @@
    font-size: 0.75em;
 }
 
-/* TipTap gán text-align lên thẻ inline, cần block thì canh lề mới ăn */
 .article-body [style*="text-align"] {
    display: block;
 }
 
-/* Ảnh chèn thẳng trong HTML — bấm được để mở lightbox */
+.article-body table {
+   width: 100% !important;
+   min-width: 0 !important;
+   margin-bottom: 1.5rem;
+   border-collapse: collapse;
+   table-layout: fixed;
+   font-size: 17px;
+   font-weight: 500;
+   line-height: 1.7;
+   color: var(--color-gray-700);
+}
+
+.dark .article-body table {
+   color: var(--color-gray-300);
+}
+
+.article-body th,
+.article-body td {
+   padding: 0.625rem 0.875rem;
+   border: 1px solid var(--color-gray-400);
+   text-align: left;
+   vertical-align: top;
+}
+
+.dark .article-body th,
+.dark .article-body td {
+   border-color: var(--color-gray-600);
+}
+
+.article-body th {
+   background: var(--color-gray-100);
+   font-weight: 700;
+   color: var(--color-gray-900);
+}
+
+.dark .article-body th {
+   background: var(--color-gray-900);
+   color: var(--color-gray-100);
+}
+
+.article-body th>p,
+.article-body td>p {
+   margin-bottom: 0;
+   font-size: inherit;
+   font-weight: inherit;
+   line-height: inherit;
+   color: inherit;
+}
+
 .article-body img {
    max-width: 100%;
    height: auto;

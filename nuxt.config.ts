@@ -7,9 +7,7 @@ export default defineNuxtConfig({
   css: ["~/assets/css/main.css"],
   fonts: {
     families: [
-      // Khai báo đủ weight đang dùng (medium→extrabold), khớp với Frontend
       { name: "Inter", provider: "google", weights: [400, 500, 600, 700, 800] },
-      // Heading trong trang xem thử dùng serif giống Frontend
       { name: "Merriweather", provider: "google", weights: [400, 700, 800] },
     ],
   },

@@ -17,7 +17,7 @@ export interface Admin {
   username: string;
 }
 
-export type BlockType = "TEXT" | "IMAGE";
+export type BlockType = "TEXT" | "IMAGE" | "FILE";
 
 export type ArticleStatus = "DRAFT" | "PUBLISHED";
 
@@ -31,22 +31,12 @@ export const KIND_LABEL: Record<CategoryKind, string> = {
   LEGAL: "Văn bản",
 };
 
-/**
- * Các loại chỉ có duy nhất 1 chuyên mục cố định (seed sẵn ở backend). Giao diện
- * ẩn ô chọn chuyên mục và cột Chuyên mục cho những loại này — chuyên mục được
- * gán tự động.
- */
 export const SINGLE_CATEGORY_KINDS: CategoryKind[] = ["EVENT", "FAQ", "LEGAL"];
 
 export function hasCategoryPicker(kind: CategoryKind) {
   return !SINGLE_CATEGORY_KINDS.includes(kind);
 }
 
-/**
- * 5 loại Thông báo cố định (seed sẵn ở backend) theo thứ tự nghiệp vụ. Backend
- * không giữ thứ tự cho loại thông báo nên danh sách này quyết định thứ tự hiện
- * trong ô chọn chuyên mục khi soạn thông báo — trùng thứ tự menu của website.
- */
 export const NOTICE_TYPE_SLUGS = [
   "mo-thu-tuc-pha-san",
   "thong-bao-tong-dat",
@@ -55,7 +45,6 @@ export const NOTICE_TYPE_SLUGS = [
   "lua-chon-to-chuc-dau-gia-tai-san",
 ];
 
-/** Sắp chuyên mục Thông báo theo thứ tự trên; chuyên mục lạ xếp xuống cuối. */
 export function sortNoticeTypes<T extends { slug: string }>(items: T[]): T[] {
   const rank = (slug: string) => {
     const i = NOTICE_TYPE_SLUGS.indexOf(slug);
@@ -64,15 +53,12 @@ export function sortNoticeTypes<T extends { slug: string }>(items: T[]): T[] {
   return [...items].sort((a, b) => rank(a.slug) - rank(b.slug));
 }
 
-// Chuyên mục rút gọn, đúng những gì API nhúng trong bài viết
 export interface CategoryRef {
   id: string;
   name: string;
   slug: string;
   kind: CategoryKind;
 }
-
-// Bản đầy đủ, chỉ GET /categories mới trả về
 export interface Category extends CategoryRef {
   articleCount: number;
 }
@@ -81,7 +67,7 @@ export interface ContentBlock {
   id: string;
   type: BlockType;
   content: string;
-  // Chú thích ảnh, luôn null với block TEXT
+
   caption: string | null;
   order: number;
   articleId: string;
@@ -93,14 +79,9 @@ export interface Article {
   slug: string;
   thumbnail: string;
   status: ArticleStatus;
-  // Bài nổi bật — website ưu tiên hiển thị ở khối tin nổi bật
   featured: boolean;
-  // Lượt xem, backend tăng mỗi lần trang chi tiết công khai được mở
   views: number;
-  // Tòa chuyên trách thụ lý — chỉ có ở thông báo phá sản (kind = NOTICE)
   court: Court | null;
-  // Số hiệu và ngày hiệu lực — chỉ có ở văn bản pháp luật (kind = LEGAL);
-  // effectiveDate là chuỗi ISO do API trả về
   documentCode: string | null;
   effectiveDate: string | null;
   categoryId: string;
@@ -116,7 +97,6 @@ export interface ArticleStats {
   draft: number;
   categories: number;
   notices: number;
-  /** Tổng lượt xem của mọi bài viết, không lọc theo kind */
   views: number;
 }
 
@@ -131,11 +111,6 @@ export interface ArticleListFilters {
   q?: string;
 }
 
-/**
- * Payload ArticleForm emit khi submit. Dùng chung cho mọi loại nội dung —
- * những field chỉ áp dụng cho một loại (court, documentCode, effectiveDate)
- * gửi chuỗi rỗng khi không dùng để backend lưu null.
- */
 export interface ArticleFormPayload {
   title: string;
   categoryId: string;
@@ -157,13 +132,6 @@ export interface EditorBlock {
   preview?: string;
 }
 
-/**
- * Bản nháp gửi sang tab xem thử qua localStorage. Phải JSON hóa được nên không
- * mang theo File — ảnh chưa upload đi bằng blob URL của tab đang soạn.
- *
- * Không có thumbnail: trường đó chỉ dùng cho card ở danh sách, thân bài không
- * render lại.
- */
 export interface ArticlePreviewDraft {
   title: string;
   categoryName?: string;
@@ -172,13 +140,12 @@ export interface ArticlePreviewDraft {
 
 export type BlockPayload =
   | { type: "TEXT"; content: string }
-  | { type: "IMAGE"; imageIndex: number; content?: string; caption?: string };
+  | { type: "IMAGE"; imageIndex: number; content?: string; caption?: string }
+  | { type: "FILE"; fileIndex: number; content?: string; caption?: string };
 
-/**
- * Số bài nổi bật tối đa được đăng cùng lúc — phải khớp MAX_FEATURED trong
- * backend/src/article/article.service.ts. Vượt trần thì backend tự bỏ nổi bật
- * bài đăng cũ nhất và báo lại trong message.
- */
+export const FILE_ACCEPT = "application/pdf";
+export const MAX_FILE_BYTES = 20 * 1024 * 1024;
+
 export const MAX_FEATURED = 3;
 
 export const STATUS_LABEL: Record<ArticleStatus, string> = {
@@ -186,7 +153,6 @@ export const STATUS_LABEL: Record<ArticleStatus, string> = {
   PUBLISHED: "Đã đăng",
 };
 
-// Tòa chuyên trách — đồng bộ với enum Court trong backend/prisma/schema.prisma
 export type Court = "KV2_HA_NOI" | "KV1_DA_NANG" | "KV1_HCM";
 
 export const COURT_LABEL: Record<Court, string> = {

@@ -15,8 +15,11 @@ export function useArticlePreview() {
       blocks: draft.blocks.map((b) => ({
         key: b.key,
         type: b.type,
-        content: b.type === "IMAGE" ? b.preview || b.content : b.content,
-        caption: b.type === "IMAGE" ? b.caption?.trim() || undefined : undefined,
+        content: b.type === "TEXT" ? b.content : b.preview || b.content,
+        caption:
+          b.type === "TEXT"
+            ? undefined
+            : b.caption?.trim() || (b.type === "FILE" ? b.file?.name : "") || undefined,
       })),
     };
 

@@ -1,6 +1,6 @@
 <template>
    <div>
-      <NuxtLink to="/thong-bao-pha-san"
+      <NuxtLink to="/thong-bao"
          class="inline-flex items-center gap-1.5 text-[13px] font-semibold text-gray-500 hover:text-primary transition-colors mb-4">
          <IconsChevronLeft class="size-3.75" />
          Quay lại danh sách
@@ -11,7 +11,7 @@
          <div class="h-80 rounded-[14px] bg-gray-100 animate-pulse"></div>
       </div>
 
-      <ArticleForm v-else is-edit base-path="/thong-bao-pha-san" :loading="loading" :initial-title="article.title"
+      <ArticleForm v-else is-edit base-path="/thong-bao" :loading="loading" :initial-title="article.title"
          :initial-thumbnail-url="article.thumbnail"
          :initial-category-id="article.categoryId" :initial-kind="article.category.kind"
          :initial-status="article.status" :initial-featured="article.featured" :initial-blocks="initialBlocks" :initial-court="article.court ?? ''"
@@ -47,7 +47,7 @@ onMounted(async () => {
       }
    } catch (e: any) {
       toast.error(e.message)
-      await navigateTo('/thong-bao-pha-san')
+      await navigateTo('/thong-bao')
    }
 })
 
@@ -57,7 +57,7 @@ async function onSubmit(payload: ArticleFormPayload) {
       const fd = buildArticleFormData(payload)
       const res = await store.update(id, fd)
       toast.success(res.message)
-      await navigateTo('/thong-bao-pha-san')
+      await navigateTo('/thong-bao')
    } catch (e: any) {
       toast.error(e.message)
    } finally {

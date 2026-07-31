@@ -123,7 +123,7 @@ const menu = [
    { to: '/tin-tuc', label: 'Tin tức', icon: IconsPosts },
    { to: '/su-kien', label: 'Sự kiện', icon: IconsPosts },
    { to: '/chuyen-muc', label: 'Chuyên mục', icon: IconsTag },
-   { to: '/thong-bao-pha-san', label: 'Thông báo', icon: IconsAnnouncements },
+   { to: '/thong-bao', label: 'Thông báo', icon: IconsAnnouncements },
    { to: '/cau-hoi-thuong-gap', label: 'Câu hỏi thường gặp', icon: IconsQuestion },
    { to: '/van-ban-phap-luat', label: 'Văn bản pháp luật', icon: IconsLegal },
 ]
@@ -142,9 +142,9 @@ const meta = computed(() => {
    if (p.startsWith('/su-kien/')) return ['Sửa sự kiện', 'Trình soạn thảo nội dung']
    if (p.startsWith('/su-kien')) return ['Quản lý sự kiện', 'Danh sách toàn bộ sự kiện']
    if (p.startsWith('/chuyen-muc')) return ['Chuyên mục', 'Phân loại bài viết']
-   if (p === '/thong-bao-pha-san/create') return ['Thêm thông báo', 'Soạn thông báo phá sản']
-   if (p.startsWith('/thong-bao-pha-san/')) return ['Sửa thông báo', 'Soạn thông báo phá sản']
-   if (p.startsWith('/thong-bao-pha-san')) return ['Thông báo phá sản', 'Quản lý thông báo phá sản']
+   if (p === '/thong-bao/create') return ['Thêm thông báo', 'Soạn thông báo']
+   if (p.startsWith('/thong-bao/')) return ['Sửa thông báo', 'Soạn thông báo']
+   if (p.startsWith('/thong-bao')) return ['Thông báo', 'Quản lý thông báo']
    if (p === '/cau-hoi-thuong-gap/create') return ['Soạn câu hỏi', 'Trình soạn thảo nội dung']
    if (p.startsWith('/cau-hoi-thuong-gap/')) return ['Sửa câu hỏi', 'Trình soạn thảo nội dung']
    if (p.startsWith('/cau-hoi-thuong-gap')) return ['Câu hỏi thường gặp', 'Quản lý câu hỏi thường gặp']

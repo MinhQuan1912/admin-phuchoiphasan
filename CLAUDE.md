@@ -45,7 +45,7 @@ app/
     index.vue          # Dashboard (KPI + tin mới nhất)
     dang-nhap.vue      # Đăng nhập (layout auth, middleware guest)
     tin-tuc/           # index (list) · create · [id] (sửa)
-    thong-bao-pha-san/ # index · create · [id] — dùng lại ArticleListView/ArticleForm với kind=NOTICE
+    thong-bao/         # index · create · [id] — dùng lại ArticleListView/ArticleForm với kind=NOTICE
     su-kien/           # index · create · [id] — kind=EVENT
     cau-hoi-thuong-gap/# index · create · [id] — kind=FAQ
     van-ban-phap-luat/ # index · create · [id] — kind=LEGAL
@@ -54,7 +54,7 @@ app/
   components/
     ArticleListView.vue   # Bảng danh sách + lọc + phân trang + xóa (nhận prop kind/basePath)
     ArticleForm.vue       # Form tạo/sửa (dùng chung cho mọi CategoryKind)
-    ArticleBlockEditor.vue# Editor khối nội dung (TEXT/IMAGE, kéo-thả sắp xếp)
+    ArticleBlockEditor.vue# Editor khối nội dung (TEXT/IMAGE/FILE, kéo-thả sắp xếp)
     RichTextEditor.vue    # TipTap toolbar + nội dung cho block TEXT
     ArticlePreview.vue    # Render bài viết giống frontend (dùng ở xem-thu)
     icons/*.vue           # Icon SVG, auto-import tên Icons<Tên> (vd IconsDashboard)
@@ -81,7 +81,7 @@ Auto-import chuẩn Nuxt: components (`Icons*`, `ArticleForm`…), composables (
 
 Mọi loại nội dung **chung một thực thể `Article`**, phân biệt bằng `CategoryKind` (`NEWS` \| `NOTICE` \| `EVENT` \| `FAQ` \| `LEGAL`). Vì vậy:
 
-- `ArticleListView` và `ArticleForm` **được tái sử dụng** cho tất cả; truyền `kind`, `basePath` (`/tin-tuc`, `/thong-bao-pha-san`, `/su-kien`, `/cau-hoi-thuong-gap`), `addLabel`, `itemNoun`.
+- `ArticleListView` và `ArticleForm` **được tái sử dụng** cho tất cả; truyền `kind`, `basePath` (`/tin-tuc`, `/thong-bao`, `/su-kien`, `/cau-hoi-thuong-gap`), `addLabel`, `itemNoun`.
 - Các trang theo loại chỉ là wrapper mỏng đặt `default-kind="…"` / `kind="…"`. Khi thêm tính năng cho một loại, cân nhắc ảnh hưởng các loại kia.
 - Nhãn hiển thị lấy từ `KIND_LABEL`, `STATUS_LABEL` trong `types`.
 - **Thông báo (`NOTICE`)**: có đúng 5 chuyên mục cố định do backend seed; soạn thông báo là **chọn 1 trong 5** ở ô "Chuyên mục" (bắt buộc, không tự chọn sẵn khi tạo mới). Backend không giữ thứ tự nhóm này nên ô chọn và ô lọc sắp bằng `sortNoticeTypes()` (`~/types`, thứ tự theo `NOTICE_TYPE_SLUGS` — trùng menu của website).
@@ -99,9 +99,10 @@ Thêm một loại nội dung mới (sau khi backend đã có giá trị enum + 
 
 ## Editor Nội Dung
 
-- Bài viết là **danh sách khối** (`EditorBlock`): `TEXT` (HTML từ TipTap) hoặc `IMAGE` (`file` chưa upload + `preview` blob URL, hoặc `content` là URL cũ khi sửa).
-- Khi submit, `useArticleForm.buildArticleFormData` gói thành `multipart/form-data`: `thumbnail`, `contentImages[]`, và `blocks` (JSON string, block IMAGE trỏ ảnh qua `imageIndex`). Đây đúng contract mà `backend` article.service mong đợi.
+- Bài viết là **danh sách khối** (`EditorBlock`): `TEXT` (HTML từ TipTap), `IMAGE` (`file` chưa upload + `preview` blob URL, hoặc `content` là URL cũ khi sửa) hoặc `FILE` (tệp PDF đính kèm — cùng cơ chế `file`/`preview`/`content`, `caption` là **tên hiển thị**, bỏ trống thì backend lấy tên tệp gốc). Tệp chỉ nhận `application/pdf` và tối đa 20MB, kiểm tra ở cả `useArticleForm.validateArticle` lẫn `article.service` của backend (`FILE_ACCEPT` / `MAX_FILE_BYTES` trong `~/types` phải khớp backend).
+- Khi submit, `useArticleForm.buildArticleFormData` gói thành `multipart/form-data`: `thumbnail`, `contentImages[]`, `contentFiles[]` (PDF), và `blocks` (JSON string, block IMAGE trỏ ảnh qua `imageIndex`, block FILE trỏ tệp qua `fileIndex` — hai chỉ số đếm riêng vì là hai trường multipart khác nhau). Đây đúng contract mà `backend` article.service mong đợi.
 - Style thân bài ở trang xem thử lấy từ `app/assets/css/article-body.css` — file này **phải giống hệt** `Frontend/app/assets/css/article-body.css` (kiểm tra bằng `diff`), đó là cách duy nhất để xem thử khớp với website vì hai project không import chéo được. Đừng thêm rule `.article-body` vào `ArticlePreview.vue` nữa.
+- **Bảng** dùng `TableKit` (`@tiptap/extension-table`) với **`resizable: false`**: `columnResizing` của TipTap chỉ sửa cột bị kéo và ghi px lên `<table>`/`<col>` nên bảng phình ra khỏi khung. Thay bằng `FullWidthTableView` tự viết trong `RichTextEditor.vue` — bề rộng cột lưu ở `colwidth` dạng **đơn vị tương đối** (tổng `TABLE_UNITS = 1000`), render ra `%`, và kéo vạch ngăn chỉ chia lại giữa **hai cột hai bên** nên tổng luôn 100%. Lưu ý `addNodeView()` của TipTap trả `null` khi `resizable: true` (lúc đó `View` được `columnResizing` dùng), nên bật lại `resizable` là mất view tự viết. Nút "Chèn bảng" trên toolbar tạo bảng 3×3 có dòng tiêu đề; khi con trỏ nằm trong bảng thì hiện thêm một thanh phụ (thêm/xóa hàng cột, gộp–tách ô, xóa bảng) — cùng kiểu panel với bảng màu. Style bảng nằm ở **2 nơi**: khung soạn thảo trong `<style>` của `RichTextEditor.vue`, còn bản hiển thị ngoài website/xem thử ở `article-body.css` (nhớ chép sang Frontend). TipTap ghi độ rộng cột vào `<colgroup>` nên CSS bắt buộc có `table-layout: fixed`.
 - Xem thử (`useArticlePreview`) ghi bản nháp JSON vào `localStorage` rồi mở tab `/xem-thu` (không mang theo `File`, ảnh mới đi bằng blob URL của tab đang soạn).
 
 ## Quy Ước Khi Sửa Code

@@ -25,8 +25,8 @@
                   </svg>
                </span>
                <span class="shrink-0 text-[11px] font-semibold px-2.5 py-1 rounded-full"
-                  :class="b.type === 'TEXT' ? 'bg-primary/10 text-primary' : 'bg-emerald-50 text-emerald-700'">
-                  {{ b.type === 'TEXT' ? 'Văn bản' : 'Hình ảnh' }}
+                  :class="BLOCK_CHIP[b.type]">
+                  {{ BLOCK_LABEL[b.type] }}
                </span>
                <span class="shrink-0 text-xs text-gray-500">#{{ i + 1 }}</span>
             </div>
@@ -48,6 +48,29 @@
 
          <div v-show="!collapsed[b.key]">
             <RichTextEditor v-if="b.type === 'TEXT'" v-model="b.content" placeholder="Nhập nội dung đoạn văn..." />
+
+            <div v-else-if="b.type === 'FILE'" class="space-y-3">
+               <div v-if="b.file || b.content"
+                  class="flex items-center gap-3 p-3 bg-gray-50 border border-gray-200 rounded-[10px]">
+                  <span
+                     class="shrink-0 w-9 h-9 rounded-[9px] bg-primary/10 text-primary flex items-center justify-center">
+                     <IconsFile class="size-4.5" />
+                  </span>
+                  <div class="min-w-0">
+                     <div class="text-sm font-semibold truncate">{{ fileName(b) }}</div>
+                     <div class="text-[11px] text-gray-500">
+                        {{ b.file ? `PDF · ${formatBytes(b.file.size)}` : 'Tệp hiện tại (giữ nguyên nếu không chọn tệp mới)' }}
+                     </div>
+                  </div>
+               </div>
+
+               <input type="file" :accept="FILE_ACCEPT"
+                  class="block w-full text-sm text-gray-500 file:mr-3 file:rounded-md file:border-0 file:bg-primary file:px-3 file:py-1.5 file:text-white file:font-semibold file:cursor-pointer"
+                  @change="e => onPickFile(i, e)">
+
+               <input v-model="b.caption" type="text" placeholder="Tên hiển thị (bỏ trống thì lấy tên tệp)"
+                  class="w-full h-9.5 border border-gray-200 rounded-[10px] px-3 text-sm outline-none focus:border-primary transition-colors">
+            </div>
 
             <div v-else class="space-y-3">
                <img v-if="b.preview || b.content" :src="b.preview || b.content"
@@ -76,12 +99,27 @@
             <IconsImage class="size-3.75" />
             Thêm ảnh
          </button>
+         <button type="button" @click="addFile"
+            class="h-9.5 inline-flex items-center gap-2 px-3.5 bg-white border border-gray-200 rounded-[10px] font-semibold text-[13px] hover:bg-gray-200 transition-colors">
+            <IconsFile class="size-3.75" />
+            Thêm tệp PDF
+         </button>
       </div>
    </div>
 </template>
 
 <script setup lang="ts">
-import type { EditorBlock } from '~/types'
+import { FILE_ACCEPT, MAX_FILE_BYTES, type EditorBlock } from '~/types'
+import { useToastMessage } from '~/composables/useToastMessage'
+
+const toast = useToastMessage()
+
+const BLOCK_LABEL = { TEXT: 'Văn bản', IMAGE: 'Hình ảnh', FILE: 'Tệp PDF' } as const
+const BLOCK_CHIP = {
+   TEXT: 'bg-primary/10 text-primary',
+   IMAGE: 'bg-emerald-50 text-emerald-700',
+   FILE: 'bg-amber-50 text-amber-700',
+} as const
 
 const blocks = defineModel<EditorBlock[]>({ required: true })
 
@@ -100,6 +138,7 @@ function toggleCollapse(key: string) {
 
 function preview(b: EditorBlock) {
    if (b.type === 'IMAGE') return b.caption?.trim() || ''
+   if (b.type === 'FILE') return fileName(b)
    return (b.content || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
 }
 
@@ -135,6 +174,53 @@ function addText() {
 
 function addImage() {
    blocks.value.push({ key: uid(), type: 'IMAGE', content: '', caption: '', file: null })
+}
+
+function addFile() {
+   blocks.value.push({ key: uid(), type: 'FILE', content: '', caption: '', file: null })
+}
+
+function fileName(b: EditorBlock) {
+   return b.caption?.trim() || b.file?.name || fileNameFromUrl(b.content) || 'Tệp đính kèm'
+}
+
+function fileNameFromUrl(url?: string) {
+   if (!url) return ''
+   try {
+      const last = decodeURIComponent(new URL(url).pathname.split('/').pop() || '')
+      return last.replace(/^[0-9a-f-]{36}-/i, '')
+   } catch {
+      return ''
+   }
+}
+
+function formatBytes(bytes: number) {
+   if (bytes < 1024) return `${bytes} B`
+   if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`
+   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
+
+function onPickFile(i: number, e: Event) {
+   const input = e.target as HTMLInputElement
+   const file = input.files?.[0]
+   if (!file) return
+
+   if (file.type !== FILE_ACCEPT) {
+      toast.error('Chỉ nhận tệp PDF')
+      input.value = ''
+      return
+   }
+   if (file.size > MAX_FILE_BYTES) {
+      toast.error(`Tệp vượt quá ${MAX_FILE_BYTES / 1024 / 1024}MB`)
+      input.value = ''
+      return
+   }
+
+   const b = blocks.value[i]!
+   if (b.preview) URL.revokeObjectURL(b.preview)
+   b.file = file
+   b.content = ''
+   b.preview = URL.createObjectURL(file)
 }
 
 function remove(i: number) {
