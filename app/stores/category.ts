@@ -5,7 +5,6 @@ export const useCategoryStore = defineStore("category", () => {
   const items = ref<Category[]>([]);
   const loading = ref(false);
 
-  // Chuyên mục gần như không đổi → tải một lần rồi dùng lại
   async function fetchAll(force = false) {
     if (items.value.length && !force) return items.value;
     const api = useApi();
@@ -29,7 +28,6 @@ export const useCategoryStore = defineStore("category", () => {
     return res;
   }
 
-  // Đổi tên là slug được sinh lại theo tên mới ở backend
   async function update(id: string, name: string) {
     const api = useApi();
     const res = await api<ApiResponse<CategoryRef>>(`/categories/${id}`, {
