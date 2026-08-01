@@ -13,10 +13,10 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     public: {
-      apiBase: "http://localhost:3001/api",
+      apiBase: "be-phuchoiphasan-production.up.railway.app/api",
     },
   },
   devServer: {
-    port: 3002
-  }
+    port: 3002,
+  },
 });
