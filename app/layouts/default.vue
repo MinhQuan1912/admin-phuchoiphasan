@@ -54,10 +54,6 @@
                </div>
             </div>
             <div class="flex items-center gap-2.5 sm:gap-3.5 shrink-0">
-               <NuxtLink to="/"
-                  class="hidden sm:inline text-[13px] font-semibold text-gray-500 hover:text-primary transition-colors">Xem
-                  website →</NuxtLink>
-               <div class="hidden sm:block w-px h-6.5 bg-gray-200"></div>
                <div class="flex items-center gap-2.5">
                   <div
                      class="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-[13px]">

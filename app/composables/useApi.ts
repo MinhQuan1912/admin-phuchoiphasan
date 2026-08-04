@@ -28,13 +28,17 @@ export function useApi() {
       const message: string =
         e?.data?.message || e?.message || "Lỗi kết nối máy chủ";
 
-      if (status === 401) {
-        const path = router.currentRoute.value.path;
-        if (!GUEST_PATHS.includes(path)) {
-          auth.logout();
-          if (import.meta.client) await navigateTo("/dang-nhap");
-        }
+      if (status === 401 && !GUEST_PATHS.includes(router.currentRoute.value.path)) {
+        const reason = /^unauthorized$/i.test(message)
+          ? "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại"
+          : message;
+
+        useLogoutReason().value = reason;
+        auth.logout();
+        if (import.meta.client) await navigateTo("/dang-nhap");
+        throw new Error(reason);
       }
+
       throw new Error(message);
     }
   };

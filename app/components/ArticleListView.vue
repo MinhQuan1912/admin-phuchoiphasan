@@ -221,10 +221,11 @@ function onChangeStatus(s?: ArticleStatus) {
    load(1)
 }
 
-function goPage(n: number) {
+async function goPage(n: number) {
    if (n < 1 || n > store.totalPages || n === store.page) return
-   load(n)
-   window.scrollTo({ top: 0 })
+   await load(n)
+   await nextTick()
+   void scrollToTop()
 }
 
 async function onToggleStatus(p: Article) {

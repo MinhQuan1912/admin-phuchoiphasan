@@ -15,6 +15,9 @@
                <span class="font-extrabold text-base">Admin</span>
             </div>
 
+            <UAlert v-if="notice" color="warning" variant="subtle" icon="i-lucide-triangle-alert"
+               title="Bạn đã bị đăng xuất" :description="notice" class="mb-6" />
+
             <UForm :validate="validate" :validate-on="validateOn" :state="state" class="space-y-4"
                @submit="onSubmit" @error="onError">
                <h1 class="text-[26px] font-extrabold tracking-tight mb-1.5">Đăng nhập</h1>
@@ -55,6 +58,10 @@ const toast = useToastMessage()
 const state = reactive({ username: '', password: '' })
 const loading = ref(false)
 const showPass = ref(false)
+
+const logoutReason = useLogoutReason()
+const notice = ref(logoutReason.value)
+logoutReason.value = null
 
 const submitted = ref(false)
 const validateOn = computed<any[]>(() => (submitted.value ? ['input'] : []))
