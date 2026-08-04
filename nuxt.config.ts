@@ -13,7 +13,7 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     public: {
-      apiBase: "be-phuchoiphasan-production.up.railway.app/api",
+      apiBase: "https://be-phuchoiphasan-production.up.railway.app/api",
     },
   },
   devServer: {
