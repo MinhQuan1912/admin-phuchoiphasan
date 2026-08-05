@@ -33,9 +33,10 @@ export function useApi() {
           ? "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại"
           : message;
 
-        useLogoutReason().value = reason;
-        auth.logout();
-        if (import.meta.client) await navigateTo("/dang-nhap");
+        // Chỉ mở modal, chưa đăng xuất. Nhiều request cùng hỏng thì vẫn một
+        // modal — giữ nguyên nội dung của request hỏng đầu tiên.
+        const sessionEnded = useSessionEnded();
+        if (!sessionEnded.value) sessionEnded.value = reason;
         throw new Error(reason);
       }
 

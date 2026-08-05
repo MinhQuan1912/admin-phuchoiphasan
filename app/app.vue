@@ -3,6 +3,7 @@
     <NuxtLayout>
       <NuxtPage />
     </NuxtLayout>
+    <SessionEndedModal />
   </UApp>
 </template>
 <script setup lang="ts">
