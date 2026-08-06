@@ -14,11 +14,8 @@
             </div>
             <div>
                <label class="block text-[13px] font-semibold mb-1.5">Loại nội dung</label>
-               <select v-model="filters.kind"
-                  class="w-full h-9.5 border border-gray-200 rounded-[10px] px-2.5 text-sm outline-none focus:border-primary transition-colors">
-                  <option value="">Tất cả</option>
-                  <option v-for="(label, k) in KIND_LABEL" :key="k" :value="k">{{ label }}</option>
-               </select>
+               <USelect v-model="filters.kind" :items="kindItems" placeholder="Tất cả" variant="outline"
+                  class="w-full" :ui="{ base: 'w-full h-9.5 rounded-[10px]' }" />
             </div>
             <div>
                <label class="block text-[13px] font-semibold mb-1.5">Người thao tác</label>
@@ -113,14 +110,27 @@ const toast = useToastMessage()
 const loading = ref(true)
 const showSkeleton = useDelayedFlag(loading)
 
+// USelect dùng `undefined` cho mục "chưa chọn", không dùng chuỗi rỗng
 const filters = reactive({
    from: '',
    to: '',
-   kind: '' as CategoryKind | '',
+   kind: undefined as CategoryKind | undefined,
    adminId: undefined as string | undefined,
 })
 const page = ref(1)
 
+const kindItems = computed(() => [
+   { label: 'Tất cả', value: undefined as CategoryKind | undefined },
+   ...(Object.keys(KIND_LABEL) as CategoryKind[]).map(k => ({
+      label: KIND_LABEL[k],
+      value: k as CategoryKind | undefined,
+   })),
+])
+
+/**
+ * Bỏ qua người thao tác không còn `adminId` (tài khoản đã bị xóa,
+ * `onDelete: SetNull`) — chọn họ cũng không lọc được gì.
+ */
 const actorItems = computed(() => [
    { label: 'Tất cả', value: undefined as string | undefined },
    ...store.actors
@@ -164,7 +174,7 @@ function go(next: number) {
 function clearFilters() {
    filters.from = ''
    filters.to = ''
-   filters.kind = ''
+   filters.kind = undefined
    filters.adminId = undefined
 }
 
