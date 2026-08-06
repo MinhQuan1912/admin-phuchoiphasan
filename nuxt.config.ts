@@ -16,6 +16,17 @@ export default defineNuxtConfig({
       apiBase: "http://localhost:3001/api",
     },
   },
+  app: {
+    head: {
+      link: [
+        {
+          rel: "icon",
+          type: "image/x-icon",
+          href: "/favicon.ico",
+        },
+      ],
+    },
+  },
   devServer: {
     port: 3002
   }

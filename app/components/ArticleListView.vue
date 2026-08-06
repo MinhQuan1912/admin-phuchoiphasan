@@ -1,12 +1,32 @@
 <template>
    <div>
-      <div class="flex flex-wrap gap-3 items-center justify-between mb-4.5">
-         <div class="relative flex-1 min-w-65 max-w-100">
-            <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 flex">
-               <IconsSearch class="size-4.25" />
-            </span>
-            <input v-model="query" type="text" :placeholder="searchPlaceholder"
-               class="w-full h-10.5 border border-gray-200 rounded-[10px] pl-10 pr-3.5 text-sm outline-none focus:border-primary transition-colors bg-white" />
+      <div class="flex flex-wrap gap-3 items-start justify-between mb-4.5">
+         <div class="flex-1 min-w-65 max-w-100">
+            <!-- relative bọc riêng ô nhập: dòng đếm bên dưới không được kéo lệch
+                 icon và nút Tìm đang căn theo top-1/2 -->
+            <div class="relative">
+               <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 flex">
+                  <IconsSearch class="size-4.25" />
+               </span>
+               <input ref="searchInput" v-model="query" type="text" :placeholder="searchPlaceholder"
+                  class="w-full h-10.5 border border-gray-200 rounded-[10px] pl-10 pr-27 text-sm outline-none focus:border-primary transition-colors bg-white"
+                  @keyup.enter="submitSearch" @keyup.esc="clearSearch" />
+               <div class="absolute right-1.5 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                  <button v-if="query || searchTerm" type="button" title="Xóa tìm kiếm"
+                     class="w-7 h-7 flex items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+                     @click="clearSearch">
+                     <IconsClose class="size-3.75" />
+                  </button>
+                  <button type="button" title="Bấm Enter hoặc bấm đây để tìm"
+                     class="h-8 px-3.5 rounded-md bg-primary text-white text-[13px] font-semibold hover:opacity-90 transition-opacity"
+                     @click="submitSearch">
+                     Tìm
+                  </button>
+               </div>
+            </div>
+            <p v-if="searchTerm" class="mt-1.5 text-[13px] text-gray-500">
+               <strong class="text-gray-900">{{ formatNumber(store.total) }}</strong> {{ noun }} phù hợp
+            </p>
          </div>
          <NuxtLink :to="`${basePath}/create`"
             class="h-10.5 inline-flex items-center gap-2 px-4.5 bg-primary text-white rounded-[10px] font-semibold text-sm hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/30 hover:-translate-y-0.5 active:translate-y-0 transition-all">
@@ -149,7 +169,11 @@ const statusTabs: { label: string; value?: ArticleStatus }[] = [
 const route = useRoute()
 const router = useRouter()
 const activeStatus = ref<ArticleStatus | undefined>(undefined)
+// `query` là chữ trong ô nhập, `searchTerm` là từ khóa đã bấm tìm — tách ra để
+// gõ dở không lọc danh sách và dòng đếm luôn khớp kết quả đang hiện
 const query = ref('')
+const searchTerm = ref('')
+const searchInput = ref<HTMLInputElement | null>(null)
 const selectedCategoryId = ref<string | undefined>((route.query.categoryId as string) || undefined)
 const busyId = ref<string | null>(null)
 const pendingDelete = ref<Article | null>(null)
@@ -170,7 +194,7 @@ const categoryItems = computed(() => {
 })
 
 const isFiltered = computed(
-   () => !!activeStatus.value || !!query.value.trim() || !!selectedCategoryId.value,
+   () => !!activeStatus.value || !!searchTerm.value || !!selectedCategoryId.value,
 )
 const emptyMessage = computed(() =>
    isFiltered.value ? `Không tìm thấy ${noun.value} nào khớp bộ lọc.` : `Chưa có ${noun.value} nào.`,
@@ -193,7 +217,7 @@ function load(page = 1) {
    store.filters.kind = props.kind
    store.filters.status = activeStatus.value
    store.filters.categoryId = selectedCategoryId.value
-   store.filters.q = query.value
+   store.filters.q = searchTerm.value
    syncPageQuery(page)
    return store.fetchList({ page, limit: PAGE_SIZE }).catch((e: any) => toast.error(e.message))
 }
@@ -208,12 +232,19 @@ onMounted(async () => {
 
 watch(selectedCategoryId, () => load(1))
 
-let timer: ReturnType<typeof setTimeout> | undefined
-watch(query, () => {
-   clearTimeout(timer)
-   timer = setTimeout(() => load(1), 350)
-})
-onBeforeUnmount(() => clearTimeout(timer))
+function submitSearch() {
+   searchTerm.value = query.value.trim()
+   void load(1)
+}
+
+function clearSearch() {
+   // Chỉ gọi lại API khi đang thực sự lọc; xóa chữ gõ dở thì không cần
+   const wasFiltering = !!searchTerm.value
+   query.value = ''
+   searchTerm.value = ''
+   if (wasFiltering) void load(1)
+   searchInput.value?.focus()
+}
 
 function onChangeStatus(s?: ArticleStatus) {
    if (activeStatus.value === s) return

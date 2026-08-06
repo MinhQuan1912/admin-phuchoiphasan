@@ -20,7 +20,7 @@
                <h1 class="text-[26px] font-extrabold tracking-tight mb-1.5">Đăng nhập</h1>
                <p class="text-sm text-gray-500 mb-6.5">Nhập thông tin tài khoản quản trị của bạn.</p>
                <UFormField label="Tài khoản" name="username" required>
-                  <UInput v-model="state.username" type="text" placeholder="admin" icon="i-lucide-user"
+                  <UInput v-model="state.username" type="text" icon="i-lucide-user"
                      class="w-full" size="xl" :disabled="loading" />
                </UFormField>
 
