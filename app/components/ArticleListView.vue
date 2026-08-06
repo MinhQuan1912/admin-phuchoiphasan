@@ -113,20 +113,22 @@
             @update:page="goPage" />
       </div>
 
-      <div v-if="pendingDelete" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" @click.self="pendingDelete = null">
-         <div class="bg-white rounded-[14px] p-6 w-full max-w-105">
-            <h3 class="text-base font-extrabold">Xóa {{ noun }}?</h3>
-            <p class="mt-2 text-sm text-gray-500 leading-relaxed">
-               {{ nounCap }} <strong class="text-gray-900">“{{ pendingDelete.title }}”</strong> cùng toàn bộ nội dung và ảnh sẽ bị xóa. Không thể hoàn tác.
-            </p>
-            <div class="mt-5 flex justify-end gap-2.5">
-               <button type="button" class="h-10 px-4 bg-white border border-gray-200 rounded-[10px] font-semibold text-sm hover:bg-gray-200 transition-colors" @click="pendingDelete = null">Hủy</button>
-               <button type="button" :disabled="deleting" class="h-10 px-4 bg-rose-700 text-white rounded-[10px] font-bold text-sm hover:bg-rose-800 hover:shadow-lg hover:shadow-rose-700/30 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-60 disabled:shadow-none disabled:translate-y-0 disabled:hover:bg-rose-700 transition-all" @click="confirmDelete">
-                  {{ deleting ? 'Đang xóa...' : 'Xóa' }}
-               </button>
+      <Transition name="modal">
+         <div v-if="pendingDelete" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" @click.self="pendingDelete = null">
+            <div class="modal-panel bg-white rounded-[14px] p-6 w-full max-w-105">
+               <h3 class="text-base font-extrabold">Xóa {{ noun }}?</h3>
+               <p class="mt-2 text-sm text-gray-500 leading-relaxed">
+                  {{ nounCap }} <strong class="text-gray-900">“{{ pendingDelete.title }}”</strong> cùng toàn bộ nội dung và ảnh sẽ bị xóa. Không thể hoàn tác.
+               </p>
+               <div class="mt-5 flex justify-end gap-2.5">
+                  <button type="button" class="h-10 px-4 bg-white border border-gray-200 rounded-[10px] font-semibold text-sm hover:bg-gray-200 transition-colors" @click="pendingDelete = null">Hủy</button>
+                  <button type="button" :disabled="deleting" class="h-10 px-4 bg-rose-700 text-white rounded-[10px] font-bold text-sm hover:bg-rose-800 hover:shadow-lg hover:shadow-rose-700/30 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-60 disabled:shadow-none disabled:translate-y-0 disabled:hover:bg-rose-700 transition-all" @click="confirmDelete">
+                     {{ deleting ? 'Đang xóa...' : 'Xóa' }}
+                  </button>
+               </div>
             </div>
          </div>
-      </div>
+      </Transition>
    </div>
 </template>
 

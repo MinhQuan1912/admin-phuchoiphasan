@@ -28,7 +28,8 @@
                   <UInput v-model="state.password" :type="showPass ? 'text' : 'password'"
                      icon="i-heroicons-lock-closed" class="w-full" size="xl" :disabled="loading">
                      <template #trailing>
-                        <button type="button" @click="showPass = !showPass">
+                        <button type="button" tabindex="-1" aria-label="Hiện/ẩn mật khẩu"
+                           @click="showPass = !showPass">
                            <UIcon :name="showPass ? 'i-heroicons-eye-slash' : 'i-heroicons-eye'" />
                         </button>
                      </template>
