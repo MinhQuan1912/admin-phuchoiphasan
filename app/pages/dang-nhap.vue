@@ -36,6 +36,12 @@
                </UFormField>
 
                <UButton type="submit" block :loading="loading" label="Đăng nhập" />
+
+               <div class="text-center">
+                  <NuxtLink to="/quen-mat-khau" class="text-[13px] font-semibold text-primary hover:underline">
+                     Quên mật khẩu?
+                  </NuxtLink>
+               </div>
             </UForm>
          </div>
       </div>

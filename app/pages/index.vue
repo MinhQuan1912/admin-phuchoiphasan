@@ -15,6 +15,48 @@
          </div>
       </div>
 
+      <div class="bg-white border border-gray-200 rounded-[14px] p-5 mb-6">
+         <div class="flex items-center justify-between mb-1.5">
+            <div class="flex items-center gap-2.5">
+               <span class="w-1 h-5 bg-primary rounded-sm"></span>
+               <h3 class="text-base font-extrabold">Hoạt động mới nhất</h3>
+            </div>
+            <NuxtLink to="/hoat-dong" class="text-[13px] font-semibold text-primary">Xem tất cả →</NuxtLink>
+         </div>
+         <p class="text-[13px] text-gray-500 mb-1">Ai vừa thao tác gì trên nội dung của website.</p>
+
+         <div v-if="loading" class="py-3.5">
+            <div v-for="i in 4" :key="i" class="h-13 border-t border-gray-100 first:border-t-0 flex items-center">
+               <div class="h-9 w-full rounded-md" :class="showSkeleton ? 'bg-gray-100 animate-pulse' : ''"></div>
+            </div>
+         </div>
+
+         <p v-else-if="!activity.recent.length" class="py-10 text-center text-sm text-gray-500">
+            Chưa có hoạt động nào được ghi nhận.
+         </p>
+
+         <div v-for="a in activity.recent" v-else :key="a.id"
+            class="flex items-center gap-3.5 py-3.5 border-t border-gray-100 first:border-t-0">
+            <span
+               class="w-9 h-9 shrink-0 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-[13px]">
+               {{ a.adminName.slice(0, 2).toUpperCase() }}
+            </span>
+            <div class="flex-1 min-w-0">
+               <div class="text-sm leading-snug truncate">
+                  <span class="font-semibold">{{ a.adminName }}</span>
+                  {{ ' ' }}{{ ACTIVITY_ACTION_LABEL[a.action] }}
+                  {{ ACTIVITY_TARGET_LABEL[a.targetType] }}
+                  <span class="font-semibold">"{{ a.targetTitle }}"</span>
+               </div>
+               <div class="text-xs text-gray-500 mt-0.5">{{ formatDateTime(a.createdAt) }}</div>
+            </div>
+            <span class="text-[13px] font-bold uppercase tracking-wide px-3 py-1.5 rounded-full whitespace-nowrap"
+               :class="ACTIVITY_ACTION_STYLE[a.action]">
+               {{ ACTIVITY_ACTION_LABEL[a.action] }}
+            </span>
+         </div>
+      </div>
+
       <div class="bg-white border border-gray-200 rounded-[14px] p-5">
          <div class="flex items-center justify-between mb-1.5">
             <div class="flex items-center gap-2.5">
@@ -53,13 +95,21 @@
 <script setup lang="ts">
 import { IconsAnnouncements, IconsCheck, IconsEye, IconsPosts } from '#components'
 import { useToastMessage } from '~/composables/useToastMessage'
+import { useActivityStore } from '~/stores/activity'
 import { useArticleStore } from '~/stores/article'
-import { STATUS_LABEL, type ArticleStatus } from '~/types'
+import {
+   ACTIVITY_ACTION_LABEL,
+   ACTIVITY_ACTION_STYLE,
+   ACTIVITY_TARGET_LABEL,
+   STATUS_LABEL,
+   type ArticleStatus,
+} from '~/types'
 
 definePageMeta({ middleware: 'auth' })
 useHead({ title: 'Tổng quan · Quản trị' })
 
 const store = useArticleStore()
+const activity = useActivityStore()
 const toast = useToastMessage()
 const loading = ref(true)
 const showSkeleton = useDelayedFlag(loading)
@@ -76,8 +126,9 @@ onMounted(async () => {
       const pending = Promise.all([
          store.fetchStats(),
          store.fetchList({ page: 1, limit: 5, status: undefined, q: '' }),
+         activity.fetchRecent(8),
       ])
-      loading.value = !store.stats || !store.listFromCache
+      loading.value = !store.stats || !store.listFromCache || !activity.recentLoaded
       await pending
    } catch (e: any) {
       toast.error(e.message)
@@ -89,6 +140,13 @@ onMounted(async () => {
 function formatDate(d: string) {
    return new Date(d).toLocaleDateString('vi-VN', {
       day: '2-digit', month: '2-digit', year: 'numeric',
+   })
+}
+
+function formatDateTime(d: string) {
+   return new Date(d).toLocaleString('vi-VN', {
+      day: '2-digit', month: '2-digit', year: 'numeric',
+      hour: '2-digit', minute: '2-digit',
    })
 }
 

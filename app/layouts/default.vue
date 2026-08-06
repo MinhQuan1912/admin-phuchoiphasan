@@ -1,7 +1,7 @@
 <template>
    <div class="min-h-screen bg-gray-50 text-gray-900 font-sans flex">
       <div v-if="mobileOpen" class="fixed inset-0 z-40 bg-black/50 lg:hidden" @click="mobileOpen = false"></div>
-
+      
       <aside :class="[
          'bg-gray-900 text-white flex flex-col shrink-0 z-50 h-screen transition-all duration-300 ease-in-out',
          'fixed inset-y-0 left-0 w-62 lg:sticky lg:top-0 lg:translate-x-0',
@@ -63,6 +63,10 @@
                      <div class="text-[11px] text-gray-500">Quản trị viên</div>
                   </div>
                </div>
+               <button type="button" @click="passwordModal = true"
+                  class="shrink-0 h-9 px-3 bg-white border border-gray-200 rounded-[10px] text-[13px] font-semibold whitespace-nowrap hover:bg-gray-200 hover:text-primary transition-colors">
+                  Đổi mật khẩu
+               </button>
             </div>
          </header>
 
@@ -70,17 +74,20 @@
             <slot />
          </main>
       </div>
+
+      <ChangePasswordModal v-model="passwordModal" />
    </div>
 </template>
 
 <script setup lang="ts">
-import { IconsAnnouncements, IconsDashboard, IconsLegal, IconsPosts, IconsQuestion, IconsTag } from '#components'
+import { IconsAnnouncements, IconsDashboard, IconsLegal, IconsPosts, IconsQuestion, IconsTag, IconsUsers } from '#components'
 import { useAuthStore } from '~/stores/auth'
 
 const route = useRoute()
 const auth = useAuthStore()
 const sidebarOpen = ref(true)
 const mobileOpen = ref(false)
+const passwordModal = ref(false)
 
 const expanded = computed(() => mobileOpen.value || sidebarOpen.value)
 
@@ -122,6 +129,7 @@ const menu = [
    { to: '/thong-bao', label: 'Thông báo', icon: IconsAnnouncements },
    { to: '/cau-hoi-thuong-gap', label: 'Câu hỏi thường gặp', icon: IconsQuestion },
    { to: '/van-ban-phap-luat', label: 'Văn bản pháp luật', icon: IconsLegal },
+   { to: '/hoat-dong', label: 'Hoạt động', icon: IconsUsers },
 ]
 
 function isActive(item: { to: string; exact?: boolean }) {
@@ -147,7 +155,7 @@ const meta = computed(() => {
    if (p === '/van-ban-phap-luat/create') return ['Soạn văn bản', 'Trình soạn thảo nội dung']
    if (p.startsWith('/van-ban-phap-luat/')) return ['Sửa văn bản', 'Trình soạn thảo nội dung']
    if (p.startsWith('/van-ban-phap-luat')) return ['Văn bản pháp luật', 'Quản lý văn bản pháp luật']
-   if (p.startsWith('/change-password')) return ['Đổi mật khẩu', 'Cập nhật mật khẩu đăng nhập']
+   if (p.startsWith('/hoat-dong')) return ['Hoạt động', 'Nhật ký thao tác của quản trị viên']
    return ['Quản trị', '']
 })
 const title = computed(() => meta.value[0])

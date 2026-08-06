@@ -59,6 +59,39 @@ export const useAuthStore = defineStore("auth", () => {
     return res.message;
   }
 
+  /** Gửi mã OTP về email (chỉ được khi username chính là địa chỉ email). */
+  async function forgotPassword(username: string) {
+    const api = useApi();
+    const res = await api<ApiResponse>("/auth/admin/forgot-password", {
+      method: "POST",
+      body: { username },
+    });
+    return res.message;
+  }
+
+  /** Kiểm mã trước khi sang bước đặt mật khẩu; mã chưa bị tiêu. */
+  async function verifyOtp(username: string, otp: string) {
+    const api = useApi();
+    const res = await api<ApiResponse>("/auth/admin/verify-otp", {
+      method: "POST",
+      body: { username, otp },
+    });
+    return res.message;
+  }
+
+  async function resetPassword(
+    username: string,
+    otp: string,
+    newPassword: string,
+  ) {
+    const api = useApi();
+    const res = await api<ApiResponse>("/auth/admin/reset-password", {
+      method: "POST",
+      body: { username, otp, newPassword },
+    });
+    return res.message;
+  }
+
   return {
     token,
     admin,
@@ -69,5 +102,8 @@ export const useAuthStore = defineStore("auth", () => {
     fetchMe,
     logout,
     changePassword,
+    forgotPassword,
+    verifyOtp,
+    resetPassword,
   };
 });

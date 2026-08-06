@@ -1,6 +1,6 @@
 import type { FetchOptions } from "ofetch";
 
-const GUEST_PATHS = ["/dang-nhap"];
+const GUEST_PATHS = ["/dang-nhap", "/quen-mat-khau"];
 
 export function useApi() {
   const config = useRuntimeConfig();
@@ -33,8 +33,6 @@ export function useApi() {
           ? "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại"
           : message;
 
-        // Chỉ mở modal, chưa đăng xuất. Nhiều request cùng hỏng thì vẫn một
-        // modal — giữ nguyên nội dung của request hỏng đầu tiên.
         const sessionEnded = useSessionEnded();
         if (!sessionEnded.value) sessionEnded.value = reason;
         throw new Error(reason);

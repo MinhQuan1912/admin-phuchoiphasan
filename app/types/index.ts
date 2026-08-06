@@ -103,6 +103,69 @@ export interface ArticleStats {
   views: number;
 }
 
+export type ActivityAction =
+  | "CREATE"
+  | "UPDATE"
+  | "DELETE"
+  | "PUBLISH"
+  | "UNPUBLISH";
+
+export type ActivityTarget = "ARTICLE" | "CATEGORY";
+
+export interface ActivityLog {
+  id: string;
+  adminId: string | null;
+  adminName: string;
+  action: ActivityAction;
+  targetType: ActivityTarget;
+  targetId: string | null;
+  targetTitle: string;
+  targetKind: CategoryKind | null;
+  createdAt: string;
+}
+
+export interface ActivityActor {
+  id: string | null;
+  name: string;
+}
+
+export interface ActivityListFilters {
+  page?: number;
+  limit?: number;
+  from?: string;
+  to?: string;
+  kind?: CategoryKind;
+  adminId?: string;
+}
+
+export const ACTIVITY_TARGET_LABEL: Record<ActivityTarget, string> = {
+  ARTICLE: "bài viết",
+  CATEGORY: "chuyên mục",
+};
+
+export const ACTIVITY_ACTION_LABEL: Record<ActivityAction, string> = {
+  CREATE: "đã tạo",
+  UPDATE: "đã sửa",
+  DELETE: "đã xóa",
+  PUBLISH: "đã đăng",
+  UNPUBLISH: "đã chuyển về nháp",
+};
+
+export const ACTIVITY_ACTIONS: ActivityAction[] = [
+  "UPDATE",
+  "PUBLISH",
+  "UNPUBLISH",
+  "DELETE",
+];
+
+export const ACTIVITY_ACTION_STYLE: Record<ActivityAction, string> = {
+  CREATE: "bg-primary/10 text-primary",
+  UPDATE: "bg-amber-50 text-amber-700",
+  DELETE: "bg-rose-50 text-rose-700",
+  PUBLISH: "bg-emerald-50 text-emerald-700",
+  UNPUBLISH: "bg-gray-100 text-gray-500",
+};
+
 export interface ArticleListFilters {
   page?: number;
   limit?: number;
