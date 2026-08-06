@@ -71,12 +71,6 @@
                <input v-if="isVi" type="file" :accept="FILE_ACCEPT"
                   class="block w-full text-sm text-gray-500 file:mr-3 file:rounded-md file:border-0 file:bg-primary file:px-3 file:py-1.5 file:text-white file:font-semibold file:cursor-pointer"
                   @change="e => onPickFile(i, e)">
-
-               <input v-if="isVi" v-model="b.caption" type="text"
-                  placeholder="Tên hiển thị (bỏ trống thì lấy tên tệp)"
-                  class="w-full h-9.5 border border-gray-200 rounded-[10px] px-3 text-sm outline-none focus:border-primary transition-colors">
-               <input v-else v-model="b.captionEn" type="text" placeholder="Tên hiển thị tiếng Anh"
-                  class="w-full h-9.5 border border-gray-200 rounded-[10px] px-3 text-sm outline-none focus:border-primary transition-colors">
             </div>
 
             <div v-else class="space-y-3">
@@ -97,7 +91,6 @@
          </div>
       </div>
 
-      <!-- Bố cục khối dùng chung hai ngôn ngữ: chỉ thêm/xóa/sắp xếp ở bản tiếng Việt -->
       <p v-if="!isVi" class="text-[12px] text-gray-500">
          Đang sửa bản tiếng Anh — dịch nội dung các khối sẵn có. Muốn thêm, xóa hay đổi thứ tự khối
          thì chuyển về bản tiếng Việt.
@@ -157,7 +150,7 @@ function toggleCollapse(key: string) {
 
 function preview(b: EditorBlock) {
    if (b.type === 'IMAGE') return (isVi.value ? b.caption : b.captionEn)?.trim() || ''
-   if (b.type === 'FILE') return isVi.value ? fileName(b) : (b.captionEn?.trim() || fileName(b))
+   if (b.type === 'FILE') return fileName(b)
    const html = isVi.value ? b.content : b.contentEn
    return (html || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
 }
@@ -197,11 +190,11 @@ function addImage() {
 }
 
 function addFile() {
-   blocks.value.push({ key: uid(), type: 'FILE', content: '', caption: '', file: null })
+   blocks.value.push({ key: uid(), type: 'FILE', content: '', file: null })
 }
 
 function fileName(b: EditorBlock) {
-   return b.caption?.trim() || b.file?.name || fileNameFromUrl(b.content) || 'Tệp đính kèm'
+   return b.file?.name || fileNameFromUrl(b.content) || 'Tệp đính kèm'
 }
 
 function fileNameFromUrl(url?: string) {

@@ -48,22 +48,17 @@ export function useArticleForm() {
             contentEn: b.contentEn?.trim() || undefined,
           };
         }
-        const caption = b.caption?.trim() || undefined;
-        const captionEn = b.captionEn?.trim() || undefined;
-
+        // Khối PDF không có tên hiển thị — Frontend tự suy tên từ URL tệp
         if (b.type === "FILE") {
           if (!b.file && b.content?.startsWith("http")) {
-            return {
-              type: "FILE",
-              fileIndex: -1,
-              content: b.content,
-              caption,
-              captionEn,
-            };
+            return { type: "FILE", fileIndex: -1, content: b.content };
           }
           fd.append("contentFiles", b.file as File);
-          return { type: "FILE", fileIndex: fileIndex++, caption, captionEn };
+          return { type: "FILE", fileIndex: fileIndex++ };
         }
+
+        const caption = b.caption?.trim() || undefined;
+        const captionEn = b.captionEn?.trim() || undefined;
 
         if (!b.file && b.content?.startsWith("http")) {
           return {

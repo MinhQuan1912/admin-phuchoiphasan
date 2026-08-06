@@ -17,9 +17,7 @@ export function useArticlePreview() {
         type: b.type,
         content: b.type === "TEXT" ? b.content : b.preview || b.content,
         caption:
-          b.type === "TEXT"
-            ? undefined
-            : b.caption?.trim() || (b.type === "FILE" ? b.file?.name : "") || undefined,
+          b.type === "IMAGE" ? b.caption?.trim() || undefined : undefined,
       })),
     };
 

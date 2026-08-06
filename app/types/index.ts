@@ -153,13 +153,7 @@ export type BlockPayload =
       caption?: string;
       captionEn?: string;
     }
-  | {
-      type: "FILE";
-      fileIndex: number;
-      content?: string;
-      caption?: string;
-      captionEn?: string;
-    };
+  | { type: "FILE"; fileIndex: number; content?: string };
 
 export const FILE_ACCEPT = "application/pdf";
 export const MAX_FILE_BYTES = 20 * 1024 * 1024;
