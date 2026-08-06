@@ -57,6 +57,14 @@
             <input v-model="editing.name" placeholder="VD: Pháp luật" @keyup.enter="submitForm"
                class="w-full h-10.5 border border-gray-200 rounded-[10px] px-3.5 text-sm outline-none focus:border-primary transition-colors" />
 
+            <label class="mt-3.5 mb-1.5 flex items-center gap-2 text-[13px] font-semibold">
+               Tên tiếng Anh
+               <span class="px-1.5 py-0.5 rounded bg-gray-100 text-[10px] font-bold text-gray-500">EN</span>
+            </label>
+            <input v-model="editing.nameEn" placeholder="Bỏ trống thì website tiếng Anh dùng tên tiếng Việt"
+               @keyup.enter="submitForm"
+               class="w-full h-10.5 border border-gray-200 rounded-[10px] px-3.5 text-sm outline-none focus:border-primary transition-colors" />
+
             <div class="mt-5 flex justify-end gap-2.5">
                <button type="button" class="h-10 px-4 bg-white border border-gray-200 rounded-[10px] font-semibold text-sm hover:bg-gray-200 transition-colors" @click="closeForm">Hủy</button>
                <button type="button" :disabled="saving || !editing.name.trim()"
@@ -95,14 +103,13 @@ useHead({ title: 'Chuyên mục · Quản trị' })
 const store = useCategoryStore()
 const toast = useToastMessage()
 
-// Trang này chỉ quản lý chuyên mục Tin tức; chuyên mục Thông báo và Sự kiện là cố định (seed)
 const newsCategories = computed(() => store.items.filter(c => c.kind === 'NEWS'))
 
 const firstLoad = ref(true)
 const saving = ref(false)
 const deleting = ref(false)
 const pendingDelete = ref<Category | null>(null)
-const editing = ref<{ id?: string; name: string; slug?: string } | null>(null)
+const editing = ref<{ id?: string; name: string; nameEn: string; slug?: string } | null>(null)
 
 onMounted(async () => {
    try {
@@ -115,11 +122,11 @@ onMounted(async () => {
 })
 
 function openCreate() {
-   editing.value = { name: '' }
+   editing.value = { name: '', nameEn: '' }
 }
 
 function openEdit(c: Category) {
-   editing.value = { id: c.id, name: c.name, slug: c.slug }
+   editing.value = { id: c.id, name: c.name, nameEn: c.nameEn ?? '', slug: c.slug }
 }
 
 function closeForm() {
@@ -132,8 +139,8 @@ async function submitForm() {
    saving.value = true
    try {
       const res = e.id
-         ? await store.update(e.id, e.name.trim())
-         : await store.create(e.name.trim())
+         ? await store.update(e.id, e.name.trim(), e.nameEn.trim())
+         : await store.create(e.name.trim(), e.nameEn.trim())
       toast.success(res.message)
       editing.value = null
    } catch (err: any) {

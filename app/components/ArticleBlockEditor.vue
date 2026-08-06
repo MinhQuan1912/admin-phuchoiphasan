@@ -5,7 +5,7 @@
          Chưa có nội dung. Thêm đoạn văn bản hoặc ảnh bên dưới.
       </div>
 
-      <div v-for="(b, i) in blocks" :key="b.key" :draggable="dragEnabled"
+      <div v-for="(b, i) in blocks" :key="b.key" :draggable="dragEnabled && isVi"
          @dragstart="onDragStart(i, $event)" @dragover.prevent="onDragOver(i)" @drop="onDrop(i)"
          @dragend="onDragEnd"
          class="relative border border-gray-200 rounded-[10px] p-4 bg-white transition-all"
@@ -15,8 +15,8 @@
             :class="dragIndex > i ? '-top-1' : '-bottom-1'"></div>
          <div class="flex items-center justify-between" :class="collapsed[b.key] ? '' : 'mb-3'">
             <div class="flex items-center gap-2 min-w-0 flex-1">
-               <span title="Giữ và kéo để đổi vị trí" @mousedown="dragEnabled = true" @mouseup="dragEnabled = false"
-                  @mouseleave="dragEnabled = false"
+               <span v-if="isVi" title="Giữ và kéo để đổi vị trí" @mousedown="dragEnabled = true"
+                  @mouseup="dragEnabled = false" @mouseleave="dragEnabled = false"
                   class="shrink-0 w-7 h-7 flex items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-600 cursor-grab active:cursor-grabbing select-none">
                   <svg viewBox="0 0 20 20" fill="currentColor" class="size-3.75">
                      <circle cx="7" cy="5" r="1.6" /><circle cx="13" cy="5" r="1.6" />
@@ -35,7 +35,7 @@
                   class="w-7 h-7 flex items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 hover:text-primary cursor-pointer">
                   <IconsChevronDown class="size-3.75 transition-transform" :class="collapsed[b.key] ? '-rotate-90' : ''" />
                </button>
-               <button type="button" title="Xóa khối" @click="remove(i)"
+               <button v-if="isVi" type="button" title="Xóa khối" @click="remove(i)"
                   class="w-7 h-7 flex items-center justify-center rounded-md text-gray-500 hover:bg-rose-50 hover:text-rose-800 cursor-pointer">
                   <IconsTrash class="size-3.75" />
                </button>
@@ -47,7 +47,11 @@
          </p>
 
          <div v-show="!collapsed[b.key]">
-            <RichTextEditor v-if="b.type === 'TEXT'" v-model="b.content" placeholder="Nhập nội dung đoạn văn..." />
+            <template v-if="b.type === 'TEXT'">
+               <RichTextEditor v-if="isVi" v-model="b.content" placeholder="Nhập nội dung đoạn văn..." />
+               <RichTextEditor v-else :model-value="b.contentEn ?? ''" @update:model-value="v => b.contentEn = v"
+                  placeholder="Nhập nội dung tiếng Anh cho khối này..." />
+            </template>
 
             <div v-else-if="b.type === 'FILE'" class="space-y-3">
                <div v-if="b.file || b.content"
@@ -64,31 +68,42 @@
                   </div>
                </div>
 
-               <input type="file" :accept="FILE_ACCEPT"
+               <input v-if="isVi" type="file" :accept="FILE_ACCEPT"
                   class="block w-full text-sm text-gray-500 file:mr-3 file:rounded-md file:border-0 file:bg-primary file:px-3 file:py-1.5 file:text-white file:font-semibold file:cursor-pointer"
                   @change="e => onPickFile(i, e)">
 
-               <input v-model="b.caption" type="text" placeholder="Tên hiển thị (bỏ trống thì lấy tên tệp)"
+               <input v-if="isVi" v-model="b.caption" type="text"
+                  placeholder="Tên hiển thị (bỏ trống thì lấy tên tệp)"
+                  class="w-full h-9.5 border border-gray-200 rounded-[10px] px-3 text-sm outline-none focus:border-primary transition-colors">
+               <input v-else v-model="b.captionEn" type="text" placeholder="Tên hiển thị tiếng Anh"
                   class="w-full h-9.5 border border-gray-200 rounded-[10px] px-3 text-sm outline-none focus:border-primary transition-colors">
             </div>
 
             <div v-else class="space-y-3">
                <img v-if="b.preview || b.content" :src="b.preview || b.content"
                   class="max-w-full max-h-56 rounded-[10px] border border-gray-200 object-contain">
-               <input type="file" accept="image/*"
+               <input v-if="isVi" type="file" accept="image/*"
                   class="block w-full text-sm text-gray-500 file:mr-3 file:rounded-md file:border-0 file:bg-primary file:px-3 file:py-1.5 file:text-white file:font-semibold file:cursor-pointer"
                   @change="e => onPickImage(i, e)">
-               <p v-if="b.content && !b.file" class="text-xs text-gray-500">
+               <p v-if="isVi && b.content && !b.file" class="text-xs text-gray-500">
                   Ảnh hiện tại (giữ nguyên nếu không chọn ảnh mới)
                </p>
 
-               <input v-model="b.caption" type="text" placeholder="Tiêu đề ảnh (không bắt buộc)"
+               <input v-if="isVi" v-model="b.caption" type="text" placeholder="Tiêu đề ảnh (không bắt buộc)"
+                  class="w-full h-9.5 border border-gray-200 rounded-[10px] px-3 text-sm outline-none focus:border-primary transition-colors">
+               <input v-else v-model="b.captionEn" type="text" placeholder="Tiêu đề ảnh tiếng Anh"
                   class="w-full h-9.5 border border-gray-200 rounded-[10px] px-3 text-sm outline-none focus:border-primary transition-colors">
             </div>
          </div>
       </div>
-      
-      <div class="flex gap-2">
+
+      <!-- Bố cục khối dùng chung hai ngôn ngữ: chỉ thêm/xóa/sắp xếp ở bản tiếng Việt -->
+      <p v-if="!isVi" class="text-[12px] text-gray-500">
+         Đang sửa bản tiếng Anh — dịch nội dung các khối sẵn có. Muốn thêm, xóa hay đổi thứ tự khối
+         thì chuyển về bản tiếng Việt.
+      </p>
+
+      <div v-else class="flex gap-2">
          <button type="button" @click="addText"
             class="h-9.5 inline-flex items-center gap-2 px-3.5 bg-white border border-gray-200 rounded-[10px] font-semibold text-[13px] hover:bg-gray-200 transition-colors">
             <IconsText class="size-3.75" />
@@ -121,7 +136,11 @@ const BLOCK_CHIP = {
    FILE: 'bg-amber-50 text-amber-700',
 } as const
 
+const props = withDefaults(defineProps<{ lang?: 'vi' | 'en' }>(), { lang: 'vi' })
+
 const blocks = defineModel<EditorBlock[]>({ required: true })
+
+const isVi = computed(() => props.lang === 'vi')
 
 const collapsed = reactive<Record<string, boolean>>({})
 const dragEnabled = ref(false)
@@ -137,9 +156,10 @@ function toggleCollapse(key: string) {
 }
 
 function preview(b: EditorBlock) {
-   if (b.type === 'IMAGE') return b.caption?.trim() || ''
-   if (b.type === 'FILE') return fileName(b)
-   return (b.content || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
+   if (b.type === 'IMAGE') return (isVi.value ? b.caption : b.captionEn)?.trim() || ''
+   if (b.type === 'FILE') return isVi.value ? fileName(b) : (b.captionEn?.trim() || fileName(b))
+   const html = isVi.value ? b.content : b.contentEn
+   return (html || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
 }
 
 function onDragStart(i: number, e: DragEvent) {

@@ -11,6 +11,7 @@ import {
 export function useArticleForm() {
   function buildArticleFormData(payload: {
     title?: string;
+    titleEn?: string;
     categoryId?: string;
     status?: ArticleStatus;
     featured?: boolean;
@@ -23,6 +24,7 @@ export function useArticleForm() {
     const fd = new FormData();
 
     if (payload.title !== undefined) fd.append("title", payload.title);
+    if (payload.titleEn !== undefined) fd.append("titleEn", payload.titleEn);
     if (payload.categoryId !== undefined)
       fd.append("categoryId", payload.categoryId);
     if (payload.status !== undefined) fd.append("status", payload.status);
@@ -40,23 +42,40 @@ export function useArticleForm() {
       let fileIndex = 0;
       const json: BlockPayload[] = payload.blocks.map((b) => {
         if (b.type === "TEXT") {
-          return { type: "TEXT", content: b.content || "" };
+          return {
+            type: "TEXT",
+            content: b.content || "",
+            contentEn: b.contentEn?.trim() || undefined,
+          };
         }
         const caption = b.caption?.trim() || undefined;
+        const captionEn = b.captionEn?.trim() || undefined;
 
         if (b.type === "FILE") {
           if (!b.file && b.content?.startsWith("http")) {
-            return { type: "FILE", fileIndex: -1, content: b.content, caption };
+            return {
+              type: "FILE",
+              fileIndex: -1,
+              content: b.content,
+              caption,
+              captionEn,
+            };
           }
           fd.append("contentFiles", b.file as File);
-          return { type: "FILE", fileIndex: fileIndex++, caption };
+          return { type: "FILE", fileIndex: fileIndex++, caption, captionEn };
         }
 
         if (!b.file && b.content?.startsWith("http")) {
-          return { type: "IMAGE", imageIndex: -1, content: b.content, caption };
+          return {
+            type: "IMAGE",
+            imageIndex: -1,
+            content: b.content,
+            caption,
+            captionEn,
+          };
         }
         fd.append("contentImages", b.file as File);
-        return { type: "IMAGE", imageIndex: imageIndex++, caption };
+        return { type: "IMAGE", imageIndex: imageIndex++, caption, captionEn };
       });
       fd.append("blocks", JSON.stringify(json));
     }
@@ -114,7 +133,9 @@ export function useArticleForm() {
         key: b.id,
         type: b.type,
         content: b.content,
+        contentEn: b.contentEn ?? "",
         caption: b.caption ?? "",
+        captionEn: b.captionEn ?? "",
         file: null,
       }));
   }

@@ -11,7 +11,7 @@
          <div class="h-80 rounded-[14px] bg-gray-100 animate-pulse"></div>
       </div>
 
-      <ArticleForm v-else is-edit base-path="/su-kien" :loading="loading" :initial-title="article.title"
+      <ArticleForm v-else is-edit base-path="/su-kien" :loading="loading" :initial-title="article.title" :initial-title-en="article.titleEn ?? ''"
          :initial-thumbnail-url="article.thumbnail"
          :initial-category-id="article.categoryId" :initial-kind="article.category.kind"
          :initial-status="article.status" :initial-featured="article.featured" :initial-blocks="initialBlocks"

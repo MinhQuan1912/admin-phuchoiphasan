@@ -18,21 +18,21 @@ export const useCategoryStore = defineStore("category", () => {
     }
   }
 
-  async function create(name: string) {
+  async function create(name: string, nameEn = "") {
     const api = useApi();
     const res = await api<ApiResponse<CategoryRef>>("/categories", {
       method: "POST",
-      body: { name },
+      body: { name, nameEn },
     });
     await fetchAll(true);
     return res;
   }
 
-  async function update(id: string, name: string) {
+  async function update(id: string, name: string, nameEn = "") {
     const api = useApi();
     const res = await api<ApiResponse<CategoryRef>>(`/categories/${id}`, {
       method: "PUT",
-      body: { name },
+      body: { name, nameEn },
     });
     await fetchAll(true);
     return res;

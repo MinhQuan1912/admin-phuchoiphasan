@@ -1,16 +1,34 @@
 <template>
-   <!-- minmax(0,…) + min-w-0: không có thì bảng rộng trong editor sẽ kéo giãn cả cột nội dung -->
    <div class="grid lg:grid-cols-[minmax(0,1fr)_320px] gap-4.5 items-start">
       <div class="min-w-0 bg-white border border-gray-200 rounded-[14px] p-6">
-         <label class="block text-[13px] font-semibold mb-1.5">Tiêu đề bài viết</label>
-         <input v-model="title" placeholder="Nhập tiêu đề..."
+         <div class="flex items-center justify-between gap-3 mb-4">
+            <div class="grid grid-cols-2 gap-1 p-1 bg-gray-100 rounded-[10px]">
+               <button v-for="l in langOptions" :key="l.value" type="button" @click="lang = l.value"
+                  class="h-8.5 px-4 inline-flex items-center justify-center gap-1.5 rounded-[7px] text-[13px] font-semibold transition-colors"
+                  :class="lang === l.value ? 'bg-white text-primary shadow-sm' : 'text-gray-500 hover:text-gray-900'">
+                  {{ l.label }}
+               </button>
+            </div>
+            <span v-if="isVi" class="text-[11px] text-gray-500 text-right">Bản gốc, bắt buộc</span>
+         </div>
+
+         <label class="block text-[13px] font-semibold mb-1.5">
+            {{ isVi ? 'Tiêu đề bài viết' : 'Tiêu đề tiếng Anh' }}
+         </label>
+         <input v-if="isVi" v-model="title" placeholder="Nhập tiêu đề..."
+            class="w-full h-12 border border-gray-200 rounded-[10px] px-3.5 text-base font-semibold outline-none focus:border-primary transition-colors mb-4.5" />
+         <input v-else v-model="titleEn"
             class="w-full h-12 border border-gray-200 rounded-[10px] px-3.5 text-base font-semibold outline-none focus:border-primary transition-colors mb-4.5" />
 
          <div class="flex items-center justify-between mb-1.5">
-            <label class="block text-[13px] font-semibold">Nội dung</label>
-            <span class="text-[11px] font-semibold text-gray-500">{{ blocks.length }} khối</span>
+            <label class="block text-[13px] font-semibold">
+               {{ isVi ? 'Nội dung' : 'Nội dung tiếng Anh' }}
+            </label>
+            <span class="text-[11px] font-semibold text-gray-500">
+               {{ blocks.length }} khối<template v-if="!isVi"> · đã dịch {{ translatedCount }}</template>
+            </span>
          </div>
-         <ArticleBlockEditor v-model="blocks" />
+         <ArticleBlockEditor v-model="blocks" :lang="lang" />
       </div>
 
       <div class="flex flex-col gap-4.5">
@@ -128,6 +146,7 @@ const props = defineProps<{
    basePath?: string
    defaultKind?: CategoryKind
    initialTitle?: string
+   initialTitleEn?: string
    initialThumbnailUrl?: string
    initialCategoryId?: string
    initialKind?: CategoryKind
@@ -152,6 +171,15 @@ const { validateArticle } = useArticleForm()
 const { openPreview } = useArticlePreview()
 
 const title = ref(props.initialTitle ?? '')
+const titleEn = ref(props.initialTitleEn ?? '')
+
+const lang = ref<'vi' | 'en'>('vi')
+const isVi = computed(() => lang.value === 'vi')
+const langOptions = [
+   { value: 'vi' as const, label: 'Tiếng Việt' },
+   { value: 'en' as const, label: 'English' },
+]
+
 const categoryId = ref(props.initialCategoryId ?? '')
 const kind = ref<CategoryKind>(props.initialKind ?? props.defaultKind ?? 'NEWS')
 const status = ref<ArticleStatus>(props.initialStatus ?? 'DRAFT')
@@ -168,6 +196,11 @@ const effectiveDate = ref(props.initialEffectiveDate ?? '')
 const thumbnailFile = ref<File | null>(null)
 const thumbnailPreview = ref<string>('')
 const blocks = ref<EditorBlock[]>(props.initialBlocks ? [...props.initialBlocks] : [])
+
+function blockTranslated(b: EditorBlock) {
+   return b.type === 'TEXT' ? !!b.contentEn?.trim() : !!b.captionEn?.trim()
+}
+const translatedCount = computed(() => blocks.value.filter(blockTranslated).length)
 
 const categories = computed(() => categoryStore.items)
 const kindCategories = computed(() => {
@@ -195,6 +228,7 @@ function syncCategoryToKind() {
 watch(kind, syncCategoryToKind)
 
 watch(() => props.initialTitle, v => v !== undefined && (title.value = v))
+watch(() => props.initialTitleEn, v => v !== undefined && (titleEn.value = v))
 watch(() => props.initialKind, v => v !== undefined && (kind.value = v))
 watch(() => props.initialCategoryId, v => v !== undefined && (categoryId.value = v))
 watch(() => props.initialStatus, v => v !== undefined && (status.value = v))
@@ -230,9 +264,17 @@ function onPickThumbnail(e: Event) {
 
 function onPreview() {
    openPreview({
-      title: title.value,
-      categoryName: selectedCategory.value?.name,
-      blocks: blocks.value,
+      title: (isVi.value ? title.value : titleEn.value.trim() || title.value),
+      categoryName: isVi.value
+         ? selectedCategory.value?.name
+         : (selectedCategory.value?.nameEn || selectedCategory.value?.name),
+      blocks: isVi.value
+         ? blocks.value
+         : blocks.value.map(b => ({
+            ...b,
+            content: b.type === 'TEXT' ? (b.contentEn?.trim() || b.content) : b.content,
+            caption: b.captionEn?.trim() || b.caption,
+         })),
    })
 }
 
@@ -255,6 +297,7 @@ function onSubmit() {
 
    emit('submit', {
       title: title.value,
+      titleEn: titleEn.value.trim(),
       categoryId: categoryId.value,
       status: status.value,
       featured: showFeatured.value && featured.value,

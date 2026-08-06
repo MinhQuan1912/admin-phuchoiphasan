@@ -56,6 +56,7 @@ export function sortNoticeTypes<T extends { slug: string }>(items: T[]): T[] {
 export interface CategoryRef {
   id: string;
   name: string;
+  nameEn?: string | null;
   slug: string;
   kind: CategoryKind;
 }
@@ -67,8 +68,9 @@ export interface ContentBlock {
   id: string;
   type: BlockType;
   content: string;
-
+  contentEn?: string | null;
   caption: string | null;
+  captionEn?: string | null;
   order: number;
   articleId: string;
 }
@@ -76,6 +78,7 @@ export interface ContentBlock {
 export interface Article {
   id: string;
   title: string;
+  titleEn?: string | null;
   slug: string;
   thumbnail: string;
   status: ArticleStatus;
@@ -113,6 +116,7 @@ export interface ArticleListFilters {
 
 export interface ArticleFormPayload {
   title: string;
+  titleEn: string;
   categoryId: string;
   status: ArticleStatus;
   featured: boolean;
@@ -127,7 +131,9 @@ export interface EditorBlock {
   key: string;
   type: BlockType;
   content: string;
+  contentEn?: string;
   caption?: string;
+  captionEn?: string;
   file?: File | null;
   preview?: string;
 }
@@ -139,9 +145,21 @@ export interface ArticlePreviewDraft {
 }
 
 export type BlockPayload =
-  | { type: "TEXT"; content: string }
-  | { type: "IMAGE"; imageIndex: number; content?: string; caption?: string }
-  | { type: "FILE"; fileIndex: number; content?: string; caption?: string };
+  | { type: "TEXT"; content: string; contentEn?: string }
+  | {
+      type: "IMAGE";
+      imageIndex: number;
+      content?: string;
+      caption?: string;
+      captionEn?: string;
+    }
+  | {
+      type: "FILE";
+      fileIndex: number;
+      content?: string;
+      caption?: string;
+      captionEn?: string;
+    };
 
 export const FILE_ACCEPT = "application/pdf";
 export const MAX_FILE_BYTES = 20 * 1024 * 1024;
