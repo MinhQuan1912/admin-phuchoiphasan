@@ -20,8 +20,6 @@
 const message = useSessionEnded()
 const auth = useAuthStore()
 
-// Không cho tắt bằng click nền hay phím Esc: bấm "Xác nhận" mới ra trang đăng
-// nhập, vì token hiện tại đã chết, ở lại trang cũ cũng không thao tác được gì.
 async function confirm() {
    auth.logout()
    await navigateTo('/dang-nhap')

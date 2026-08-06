@@ -2,8 +2,6 @@
    <div>
       <div class="flex flex-wrap gap-3 items-start justify-between mb-4.5">
          <div class="flex-1 min-w-65 max-w-100">
-            <!-- relative bọc riêng ô nhập: dòng đếm bên dưới không được kéo lệch
-                 icon và nút Tìm đang căn theo top-1/2 -->
             <div class="relative">
                <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 flex">
                   <IconsSearch class="size-4.25" />
@@ -171,8 +169,7 @@ const statusTabs: { label: string; value?: ArticleStatus }[] = [
 const route = useRoute()
 const router = useRouter()
 const activeStatus = ref<ArticleStatus | undefined>(undefined)
-// `query` là chữ trong ô nhập, `searchTerm` là từ khóa đã bấm tìm — tách ra để
-// gõ dở không lọc danh sách và dòng đếm luôn khớp kết quả đang hiện
+
 const query = ref('')
 const searchTerm = ref('')
 const searchInput = ref<HTMLInputElement | null>(null)
@@ -240,7 +237,6 @@ function submitSearch() {
 }
 
 function clearSearch() {
-   // Chỉ gọi lại API khi đang thực sự lọc; xóa chữ gõ dở thì không cần
    const wasFiltering = !!searchTerm.value
    query.value = ''
    searchTerm.value = ''

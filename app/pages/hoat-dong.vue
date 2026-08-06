@@ -22,11 +22,8 @@
             </div>
             <div>
                <label class="block text-[13px] font-semibold mb-1.5">Người thao tác</label>
-               <select v-model="filters.adminId"
-                  class="w-full h-9.5 border border-gray-200 rounded-[10px] px-2.5 text-sm outline-none focus:border-primary transition-colors">
-                  <option value="">Tất cả</option>
-                  <option v-for="a in store.actors" :key="a.id ?? a.name" :value="a.id ?? ''">{{ a.name }}</option>
-               </select>
+               <USelect v-model="filters.adminId" :items="actorItems" placeholder="Tất cả" variant="outline"
+                  class="w-full" :ui="{ base: 'w-full h-9.5 rounded-[10px]' }" />
             </div>
          </div>
 
@@ -116,8 +113,20 @@ const toast = useToastMessage()
 const loading = ref(true)
 const showSkeleton = useDelayedFlag(loading)
 
-const filters = reactive({ from: '', to: '', kind: '' as CategoryKind | '', adminId: '' })
+const filters = reactive({
+   from: '',
+   to: '',
+   kind: '' as CategoryKind | '',
+   adminId: undefined as string | undefined,
+})
 const page = ref(1)
+
+const actorItems = computed(() => [
+   { label: 'Tất cả', value: undefined as string | undefined },
+   ...store.actors
+      .filter(a => !!a.id)
+      .map(a => ({ label: a.name, value: a.id as string | undefined })),
+])
 
 const items = computed(() => store.list?.items ?? [])
 const total = computed(() => store.list?.total ?? 0)
@@ -156,7 +165,7 @@ function clearFilters() {
    filters.from = ''
    filters.to = ''
    filters.kind = ''
-   filters.adminId = ''
+   filters.adminId = undefined
 }
 
 watch(filters, () => {
